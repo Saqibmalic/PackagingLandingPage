@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /thank-you.html
+Disallow: /submit-lead.php
+Disallow: /leads.csv
+
+Sitemap: https://www.customboxesexperts.com/sitemap.xml
