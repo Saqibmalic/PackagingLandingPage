@@ -14,7 +14,8 @@ submit-lead.php       PHP lead handler (2 stages, uploads, CSV backup)
 google-apps-script.gs Google Sheets backend — no server needed (see section 2)
 robots.txt
 assets/css/styles.css All styling. Brand tokens live in :root at the top.
-assets/js/main.js     Two-step flow, validation, tracking, gclid/UTM capture
+assets/js/main.js     Two-step flow, validation, tracking, gallery, video facades
+assets/img/           Gallery photos + video posters (placeholders ship with it)
 uploads/              Created on first artwork upload (see Security below)
 ```
 
@@ -56,6 +57,7 @@ redirects to the thank-you page. Nothing is lost.
 | 2 | Replace `G-XXXXXXXXXX` with your GA4 measurement ID | `index.html`, `thank-you.html` (head) |
 | 3 | Replace `REPLACE_LEAD_LABEL` / `REPLACE_CALL_LABEL` conversion labels | `assets/js/main.js` (top), `thank-you.html` |
 | 4 | Replace the three `REPLACE —` testimonials with **real, attributable** quotes | `index.html` → `#reviews` |
+| 4b | Add your box photos, video IDs, and the Trustpilot RATING/COUNT (see sections 5–6) | `assets/img/`, `index.html` |
 | 5 | Choose your backend and set `BACKEND` (see section 2) | `assets/js/main.js` (top) |
 | 6 | Set the recipient email — `NOTIFY_EMAIL` (Sheets) or `$TO`/`$FROM` (PHP) | `google-apps-script.gs` / `submit-lead.php` |
 | 7 | Update `<link rel="canonical">` and the OG URLs to the real URL | `index.html` (head) |
@@ -162,7 +164,95 @@ Add these to `.htaccess` for speed (Core Web Vitals feed into landing page exper
 
 ---
 
-## 5. Google Ads setup
+## 5. Adding your photos and videos
+
+### Photos — drop-in replacement, no code
+
+The gallery ships with branded placeholders that say "Replace with your photo". Overwrite the
+files in `assets/img/` keeping the **exact filenames and dimensions** and everything else works:
+
+| File | Size | Suggested subject |
+|---|---|---|
+| `gallery-01.jpg` | 800 × 600 | Magnetic closure — soft-touch black, gold foil |
+| `gallery-02.jpg` | 600 × 600 | Drawer box — linen wrap, ribbon pull |
+| `gallery-03.jpg` | 600 × 600 | Shoulder neck — fragrance |
+| `gallery-04.jpg` | 600 × 600 | Book style — opened, showing the set |
+| `gallery-05.jpg` | 800 × 600 | Two-piece lid & base — kraft, white ink |
+| `gallery-06.jpg` | 600 × 600 | Collapsible — flat and assembled together |
+| `gallery-07.jpg` | 800 × 600 | Jewelry — velvet lined |
+| `gallery-08.jpg` | 800 × 600 | Rigid mailer — foam insert holding a product |
+
+Then update the `alt` text, the `data-caption` (shown in the lightbox) and the `<figcaption>` in
+`index.html` to describe the actual box. **Write real specs in the caption** — "2mm greyboard,
+soft-touch, gold foil, EVA insert" is what makes a buyer point at it and say "like that one."
+Generic captions waste the section.
+
+Shooting notes that matter more than camera quality: one box per frame, plain light background,
+shot at a slight angle so two faces and the lid are visible, and at least three photographed
+*open* with product inside. Buyers are judging whether it looks expensive — angle and lighting
+do that, not resolution.
+
+Keep each file **under 200KB**. Export at 82% JPEG quality; run them through
+[squoosh.app](https://squoosh.app) if they come out heavier. Images are the one thing that can
+undo the page's load speed.
+
+**If you delete the placeholders and add nothing, the section hides itself** rather than showing
+broken images. Same for individual photos.
+
+### Videos — YouTube and Shorts, loaded only on click
+
+Four vertical slots sized for Shorts (9:16). For each one, in `index.html`:
+
+1. Replace `data-video="REPLACE_ID_1"` with the **11-character YouTube video ID** — the part
+   after `/shorts/` or `?v=` in the URL. A Short at
+   `youtube.com/shorts/AbCdEfGhIjK` has the ID `AbCdEfGhIjK`.
+2. Drop a poster frame at `assets/img/video-01.jpg` (405 × 720), and update the `<figcaption>`.
+
+Nothing loads from YouTube until a visitor clicks — the tile is just an image until then. That is
+deliberate: a normal YouTube embed pulls ~700KB of scripts per video and would wreck the load
+speed this page currently has. Clicking swaps in the real player and fires a `video_play` event.
+
+**Until you set real IDs the whole video section stays hidden**, so it is safe to publish now.
+
+### Why there is no live Instagram feed
+
+You asked about embedding Instagram. I'd advise against it *on this page* specifically:
+
+- Instagram's official embed needs `embed.js` (heavy, third-party, and Meta has been steadily
+  restricting the oEmbed API). Third-party widgets like SnapWidget or LightWidget work but add
+  another render-blocking script and a monthly fee.
+- More importantly, **a live feed sends paid traffic to Instagram.** You are paying $8–25 a click
+  to get someone onto a page whose one job is capturing their phone number. A grid of tappable
+  Instagram posts is an exit door — people leave to scroll, and they do not come back.
+- A feed also shows whatever you posted last. On a rigid-boxes-only ad landing page, a mailer box
+  or a holiday post dilutes the message.
+
+The video strip above does the same job with none of those costs: your content, curated, on your
+page, with the quote form still one tap away. The Instagram and YouTube links at the bottom of
+that section are there for people who genuinely want to go follow you — after they have seen the
+boxes. Update the two `REPLACE_HANDLE` placeholders with your real handles.
+
+## 6. Reviews and the sister-brand Trustpilot
+
+The reviews block shows the **Xperts Packaging** Trustpilot rating, explicitly labelled as a
+sister company. Fill in `RATING` and `COUNT` in `index.html` from the live profile.
+
+**Do not restyle this to look like Custom Boxes Experts' own reviews, and do not remove the
+"From our sister company" badge or the italic note.** Presenting another business's reviews as
+your own breaches Google Ads' misrepresentation policy and Trustpilot's terms of use — and on a
+lead-gen account, a misrepresentation strike is one of the harder ones to appeal.
+
+Labelled honestly it still works: shared ownership and a shared production floor is a real,
+checkable claim, and a buyer who clicks through sees genuine reviews of the same team.
+
+**The better fix is to claim your own profile.** Trustpilot is free to start: claim
+`customboxesexperts.com`, then email your last 50 delivered orders an invitation. Rigid box
+buyers are high-satisfaction customers when the box lands well — you will get reviews. Once you
+have 20+, swap this block for your own TrustBox widget and the labelling problem disappears.
+
+The three `REPLACE —` testimonial cards below it still need real, attributable quotes.
+
+## 7. Google Ads setup
 
 ### Conversion actions
 Create two, both **Primary**:
@@ -228,7 +318,7 @@ Add a **call extension** with (888) 716-1078 and a **lead form asset** as a back
 
 ---
 
-## 6. Why the page is built this way
+## 8. Why the page is built this way
 
 Landing page experience is one of the three Quality Score components, and it is the one most
 packaging competitors get wrong. Specific choices here:
@@ -253,7 +343,7 @@ packaging competitors get wrong. Specific choices here:
   can tie a closed deal back to the exact keyword — and later upload offline conversions to teach
   Smart Bidding which leads were actually worth money.
 
-## 7. On adding Packlane-style instant pricing
+## 9. On adding Packlane-style instant pricing
 
 Recommended: **no, not for rigid boxes, and not while this is a lead-gen page.** Three reasons.
 
@@ -280,7 +370,7 @@ quoted a number. If you want this, I need your real cost matrix — board and wr
 inch, per-process finishing costs, assembly labour per style, and your quantity break curve.
 Without those it would just be invented numbers.
 
-## 8. What to test first
+## 10. What to test first
 
 1. **Headline** — brand-emotional (current) vs. spec-direct (`Custom Rigid Boxes From 100 Units — Quote in 1 Hour`).
 2. **Offer** — free 3D mockup (current) vs. free physical sample. The sample offer lifts lead quality and cuts volume.

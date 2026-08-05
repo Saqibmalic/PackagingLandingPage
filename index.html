@@ -96,6 +96,7 @@
   <div class="head__bar">
     <div class="wrap head__bar-in">
       <nav class="head__nav" aria-label="Page sections">
+        <a href="#work">Our Work</a>
         <a href="#styles">Box Styles</a>
         <a href="#specs">Materials &amp; Finishes</a>
         <a href="#process">How It Works</a>
@@ -225,8 +226,158 @@
   </div>
 </section>
 
+<!-- ════════════════════════════════════════════════════════════
+     WORK GALLERY
+     Drop your photos into assets/img/ using the exact filenames in
+     the src attributes below and the placeholders disappear.
+     Every <img> has width/height set so the page cannot shift as
+     photos load, and loading="lazy" keeps them off the critical path.
+     See README section "Adding your photos and videos".
+     ════════════════════════════════════════════════════════════ -->
+<section class="sec" id="work">
+  <div class="wrap">
+    <header class="sechead">
+      <h2>Rigid boxes we&rsquo;ve built</h2>
+      <p>Real production runs, photographed as they shipped. Tap any box to see it larger &mdash; the caption tells you the exact build, so you can point at one and say &ldquo;like that.&rdquo;</p>
+    </header>
+
+    <div class="gallery" id="gallery">
+
+      <figure class="shot shot--wide">
+        <img src="assets/img/gallery-01.jpg" alt="Magnetic closure rigid box in soft-touch black with gold foil logo"
+             width="800" height="600" loading="lazy" decoding="async"
+             data-caption="Magnetic closure · 2mm greyboard · soft-touch matte wrap · gold foil logo · EVA foam insert">
+        <figcaption><strong>Magnetic closure</strong><span>Soft-touch black, gold foil, foam insert</span></figcaption>
+      </figure>
+
+      <figure class="shot">
+        <img src="assets/img/gallery-02.jpg" alt="Rigid drawer box with ribbon pull in textured linen wrap"
+             width="600" height="600" loading="lazy" decoding="async"
+             data-caption="Drawer / slide-out · linen wrap · debossed logo · satin ribbon pull">
+        <figcaption><strong>Drawer box</strong><span>Linen wrap, deboss, ribbon pull</span></figcaption>
+      </figure>
+
+      <figure class="shot">
+        <img src="assets/img/gallery-03.jpg" alt="Shoulder neck rigid box for a fragrance bottle"
+             width="600" height="600" loading="lazy" decoding="async"
+             data-caption="Shoulder neck · fragrance · 2.5mm board · spot UV on matte lamination">
+        <figcaption><strong>Shoulder neck</strong><span>Fragrance, spot UV on matte</span></figcaption>
+      </figure>
+
+      <figure class="shot">
+        <img src="assets/img/gallery-04.jpg" alt="Book style rigid box opened to show a product set inside"
+             width="600" height="600" loading="lazy" decoding="async"
+             data-caption="Book style · magnet catch · printed interior · die-cut paperboard platform">
+        <figcaption><strong>Book style</strong><span>Printed interior, cut platform</span></figcaption>
+      </figure>
+
+      <figure class="shot shot--wide">
+        <img src="assets/img/gallery-05.jpg" alt="Two-piece rigid lid and base box in kraft with white ink printing"
+             width="800" height="600" loading="lazy" decoding="async"
+             data-caption="Two-piece lid &amp; base · FSC kraft wrap · white ink · molded pulp insert">
+        <figcaption><strong>Two-piece lid &amp; base</strong><span>FSC kraft, white ink, pulp insert</span></figcaption>
+      </figure>
+
+      <figure class="shot">
+        <img src="assets/img/gallery-06.jpg" alt="Collapsible rigid box shown flat and assembled side by side"
+             width="600" height="600" loading="lazy" decoding="async"
+             data-caption="Collapsible rigid · ships flat · hidden magnets · full-colour printed wrap">
+        <figcaption><strong>Collapsible rigid</strong><span>Ships flat, hidden magnets</span></figcaption>
+      </figure>
+
+      <figure class="shot shot--wide">
+        <img src="assets/img/gallery-07.jpg" alt="Jewelry rigid box with velvet lined interior"
+             width="800" height="600" loading="lazy" decoding="async"
+             data-caption="Small format jewelry box · 1.5mm board · velvet lining · rose gold foil">
+        <figcaption><strong>Jewelry box</strong><span>Velvet lining, rose gold foil</span></figcaption>
+      </figure>
+
+      <figure class="shot shot--wide">
+        <img src="assets/img/gallery-08.jpg" alt="Rigid mailer box with die-cut foam holding electronics"
+             width="800" height="600" loading="lazy" decoding="async"
+             data-caption="Rigid mailer · electronics · CNC-routed EVA foam · anti-scuff lamination">
+        <figcaption><strong>Rigid mailer</strong><span>Routed foam, anti-scuff finish</span></figcaption>
+      </figure>
+
+    </div>
+
+    <p class="center"><a class="btn btn--primary" href="#quote" data-track="cta-gallery">Get a Box Like These Quoted</a></p>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════
+     VIDEO STRIP — YouTube / Shorts via click-to-load facades.
+     Nothing from YouTube loads until someone clicks, so the embeds
+     cost zero page weight and cannot hurt Core Web Vitals.
+     Swap data-video for your real 11-character YouTube IDs and drop
+     a poster image at the matching path.
+     ════════════════════════════════════════════════════════════ -->
+<section class="sec sec--cream" id="video">
+  <div class="wrap">
+    <header class="sechead">
+      <h2>Watch a rigid box come together</h2>
+      <p>Unboxing clips and factory footage from our own production floor &mdash; the wrap, the corners, the magnets closing.</p>
+    </header>
+
+    <div class="videos">
+
+      <figure class="vid vid--tall">
+        <button class="vfacade" type="button" data-video="REPLACE_ID_1" data-track="video-play"
+                aria-label="Play: magnetic closure box unboxing">
+          <img src="assets/img/video-01.jpg" alt="" width="405" height="720" loading="lazy" decoding="async">
+          <span class="vfacade__play" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>
+          </span>
+        </button>
+        <figcaption>Magnetic closure unboxing</figcaption>
+      </figure>
+
+      <figure class="vid vid--tall">
+        <button class="vfacade" type="button" data-video="REPLACE_ID_2" data-track="video-play"
+                aria-label="Play: foil stamping on the press">
+          <img src="assets/img/video-02.jpg" alt="" width="405" height="720" loading="lazy" decoding="async">
+          <span class="vfacade__play" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>
+          </span>
+        </button>
+        <figcaption>Gold foil on the press</figcaption>
+      </figure>
+
+      <figure class="vid vid--tall">
+        <button class="vfacade" type="button" data-video="REPLACE_ID_3" data-track="video-play"
+                aria-label="Play: hand-wrapping rigid box corners">
+          <img src="assets/img/video-03.jpg" alt="" width="405" height="720" loading="lazy" decoding="async">
+          <span class="vfacade__play" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>
+          </span>
+        </button>
+        <figcaption>Hand-wrapped corners</figcaption>
+      </figure>
+
+      <figure class="vid vid--tall">
+        <button class="vfacade" type="button" data-video="REPLACE_ID_4" data-track="video-play"
+                aria-label="Play: drawer box with ribbon pull">
+          <img src="assets/img/video-04.jpg" alt="" width="405" height="720" loading="lazy" decoding="async">
+          <span class="vfacade__play" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>
+          </span>
+        </button>
+        <figcaption>Drawer box, ribbon pull</figcaption>
+      </figure>
+
+    </div>
+
+    <p class="videos__social">
+      More on
+      <a href="https://www.instagram.com/REPLACE_HANDLE/" target="_blank" rel="noopener" data-track="social-instagram">Instagram</a>
+      and
+      <a href="https://www.youtube.com/@REPLACE_HANDLE" target="_blank" rel="noopener" data-track="social-youtube">YouTube</a>
+    </p>
+  </div>
+</section>
+
 <!-- ── Why us ────────────────────────────────────────────────── -->
-<section class="sec sec--cream" id="why">
+<section class="sec" id="why">
   <div class="wrap">
     <header class="sechead">
       <h2>Why brands move their rigid box program to us</h2>
@@ -269,7 +420,7 @@
 </section>
 
 <!-- ── Box styles ────────────────────────────────────────────── -->
-<section class="sec" id="styles">
+<section class="sec sec--cream" id="styles">
   <div class="wrap">
     <header class="sechead">
       <h2>Every rigid box construction we manufacture</h2>
@@ -364,7 +515,7 @@
 </section>
 
 <!-- ── Specs ─────────────────────────────────────────────────── -->
-<section class="sec sec--cream" id="specs">
+<section class="sec" id="specs">
   <div class="wrap">
     <header class="sechead">
       <h2>The spec sheet, in plain English</h2>
@@ -488,6 +639,40 @@
 <section class="sec sec--cream" id="reviews">
   <div class="wrap">
     <header class="sechead"><h2>What buyers say after the first run</h2></header>
+    <!-- ══════════════════════════════════════════════════════════
+         SISTER-BRAND TRUSTPILOT
+         The rating below belongs to Xperts Packaging, NOT to Custom
+         Boxes Experts. The wording and the labels keep that explicit —
+         do not remove them and do not restyle this to read as if the
+         reviews were left for this company. Presenting another
+         business's reviews as your own breaches Google Ads'
+         misrepresentation policy and Trustpilot's terms.
+         Fill RATING and COUNT from the live profile.
+         ══════════════════════════════════════════════════════════ -->
+    <aside class="tp">
+      <p class="tp__flag">From our sister company</p>
+      <div class="tp__in">
+        <div class="tp__score">
+          <span class="tp__num">RATING</span>
+          <span class="tp__stars" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+          <span class="tp__count">COUNT reviews on Trustpilot</span>
+        </div>
+        <div class="tp__body">
+          <p><strong>Xperts Packaging</strong> is our sister brand &mdash; same ownership, same production
+          floor and the same project managers who will handle your rigid box order. Its Trustpilot
+          profile is public, so you can read what customers say about how we actually work before you
+          give us anything.</p>
+          <p class="tp__note">These reviews were left for Xperts Packaging, not for Custom Boxes Experts.
+          Custom Boxes Experts is building its own Trustpilot profile.</p>
+          <a class="tp__link" href="https://www.trustpilot.com/review/xpertspackaging.com"
+             target="_blank" rel="noopener nofollow" data-track="trustpilot-click">
+            Read the reviews on Trustpilot
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </div>
+      </div>
+    </aside>
+
     <div class="grid grid--3 quotes">
       <figure class="quote">
         <div class="stars" aria-label="5 out of 5">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
@@ -588,6 +773,24 @@
   </a>
   <a class="sticky__quote" href="#quote" data-track="cta-sticky">Get Free Quote</a>
 </div>
+
+<!-- ── Gallery lightbox ──────────────────────────────────────── -->
+<dialog class="lb" id="lightbox" aria-label="Box photo viewer">
+  <button type="button" class="lb__x" data-lb-close aria-label="Close photo">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg>
+  </button>
+  <button type="button" class="lb__nav lb__nav--prev" data-lb-prev aria-label="Previous photo">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+  </button>
+  <button type="button" class="lb__nav lb__nav--next" data-lb-next aria-label="Next photo">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+  </button>
+  <figure class="lb__fig">
+    <img id="lb-img" src="" alt="">
+    <figcaption id="lb-cap"></figcaption>
+  </figure>
+  <a class="btn btn--accent lb__cta" href="#quote" data-track="cta-lightbox">Quote a box like this</a>
+</dialog>
 
 <!-- ════════════════════════════════════════════════════════════
      QUOTE MODAL — two steps.

@@ -357,6 +357,101 @@ body.modal-open{overflow:hidden}
 .style h3{margin-bottom:6px;font-size:1.04rem}
 .style p{margin:0;font-size:.9rem;color:var(--muted);line-height:1.55}
 
+/* ── Work gallery ──────────────────────────────────────────── */
+.gallery{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:16px;
+}
+.shot{
+  margin:0;border-radius:var(--radius);overflow:hidden;background:var(--mint);
+  border:1px solid rgba(26,49,99,.09);position:relative;
+}
+.shot--wide{grid-column:span 2}
+.shot img{
+  display:block;width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;
+  cursor:zoom-in;transition:transform .35s ease;background:var(--mint);
+}
+.shot--wide img{aspect-ratio:4/3}
+.shot:hover img{transform:scale(1.04)}
+.shot figcaption{
+  position:absolute;left:0;right:0;bottom:0;padding:26px 16px 13px;
+  background:linear-gradient(to top,rgba(12,26,54,.88),rgba(12,26,54,0));
+  color:#fff;pointer-events:none;
+}
+.shot figcaption strong{display:block;font-family:var(--font-head);font-size:.95rem;font-weight:600}
+.shot figcaption span{display:block;font-size:.8rem;color:rgba(255,255,255,.82);margin-top:2px}
+
+/* Placeholder shown until a real photo is dropped in (broken img) */
+.shot img:not([src$=".jpg"]),
+.shot img[data-missing]{opacity:.35}
+
+/* ── Video strip ───────────────────────────────────────────── */
+.videos{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.vid{margin:0}
+.vfacade{
+  display:block;width:100%;padding:0;border:0;cursor:pointer;position:relative;
+  border-radius:var(--radius);overflow:hidden;background:var(--navy);
+  aspect-ratio:9/16;
+}
+.vid--wide .vfacade{aspect-ratio:16/9}
+.vfacade img{width:100%;height:100%;object-fit:cover;display:block;opacity:.92;transition:opacity .25s ease,transform .35s ease}
+.vfacade:hover img{opacity:1;transform:scale(1.03)}
+.vfacade__play{
+  position:absolute;inset:0;margin:auto;width:60px;height:60px;border-radius:50%;
+  background:rgba(255,255,255,.94);color:var(--navy);
+  display:grid;place-items:center;box-shadow:0 6px 24px rgba(0,0,0,.34);
+  transition:transform .2s ease,background .2s ease;
+}
+.vfacade__play svg{width:28px;height:28px;margin-left:3px}
+.vfacade:hover .vfacade__play{transform:scale(1.09);background:var(--amber)}
+.vid iframe{width:100%;aspect-ratio:9/16;border:0;border-radius:var(--radius);display:block}
+.vid--wide iframe{aspect-ratio:16/9}
+.vid figcaption{margin-top:10px;font-size:.9rem;color:var(--muted);text-align:center}
+.videos__social{margin:32px 0 0;text-align:center;font-size:.95rem;color:var(--muted)}
+.videos__social a{font-weight:700;color:var(--navy)}
+
+/* ── Lightbox ──────────────────────────────────────────────── */
+.lb{
+  border:0;padding:0;background:transparent;max-width:min(1000px,94vw);max-height:94vh;
+  overflow:visible;
+}
+.lb::backdrop{background:rgba(9,20,44,.88)}
+.lb__fig{margin:0;display:flex;flex-direction:column;align-items:center}
+.lb__fig img{max-width:100%;max-height:74vh;border-radius:10px;display:block;background:var(--navy)}
+.lb__fig figcaption{color:#fff;font-size:.92rem;margin-top:14px;text-align:center;max-width:60ch;line-height:1.5}
+.lb__x,.lb__nav{
+  position:fixed;background:rgba(255,255,255,.14);border:0;color:#fff;cursor:pointer;
+  width:48px;height:48px;border-radius:50%;display:grid;place-items:center;padding:0;
+}
+.lb__x:hover,.lb__nav:hover{background:rgba(255,255,255,.3)}
+.lb__x{top:18px;right:18px}
+.lb__x svg{width:20px;height:20px}
+.lb__nav{top:50%;transform:translateY(-50%)}
+.lb__nav svg{width:24px;height:24px}
+.lb__nav--prev{left:14px}
+.lb__nav--next{right:14px}
+.lb__cta{margin:16px auto 0;display:table}
+
+/* ── Sister-brand Trustpilot ───────────────────────────────── */
+.tp{
+  background:#fff;border:1px solid rgba(26,49,99,.12);border-radius:var(--radius);
+  padding:26px 28px;margin:0 0 34px;position:relative;
+}
+.tp__flag{
+  position:absolute;top:-12px;left:26px;margin:0;background:var(--navy);color:#fff;
+  font-family:var(--font-head);font-size:.78rem;font-weight:600;letter-spacing:.09em;
+  text-transform:uppercase;padding:5px 13px;border-radius:100px;
+}
+.tp__in{display:grid;grid-template-columns:190px 1fr;gap:28px;align-items:center}
+.tp__score{text-align:center;border-right:1px solid var(--line);padding-right:24px}
+.tp__num{display:block;font-family:var(--font-head);font-size:2.6rem;font-weight:700;color:var(--navy);line-height:1}
+.tp__stars{display:block;color:#00B67A;letter-spacing:3px;font-size:1.2rem;margin:8px 0 6px}
+.tp__count{display:block;font-size:.82rem;color:var(--muted)}
+.tp__body p{margin:0 0 10px;font-size:.96rem;color:var(--muted)}
+.tp__body strong{color:var(--navy)}
+.tp__note{font-size:.82rem!important;font-style:italic;padding-left:12px;border-left:3px solid var(--amber)}
+.tp__link{display:inline-flex;align-items:center;gap:7px;font-family:var(--font-head);font-weight:600;font-size:.94rem;color:var(--navy)}
+.tp__link svg{width:15px;height:15px}
+
 /* Specs */
 .specs{display:grid;grid-template-columns:repeat(2,1fr);gap:22px}
 .spec{background:#fff;border:1px solid rgba(26,49,99,.09);border-radius:var(--radius);padding:26px 26px 20px}
@@ -446,6 +541,11 @@ body.modal-open{overflow:hidden}
   .hero__grid{grid-template-columns:1fr;grid-template-areas:"copy" "form" "support";row-gap:32px}
   .grid--4{grid-template-columns:repeat(2,1fr)}
   .steps{grid-template-columns:repeat(2,1fr)}
+  .gallery{grid-template-columns:repeat(2,1fr)}
+  .shot--wide{grid-column:span 2}
+  .videos{grid-template-columns:repeat(2,1fr)}
+  .tp__in{grid-template-columns:1fr;gap:20px}
+  .tp__score{border-right:0;border-bottom:1px solid var(--line);padding:0 0 18px}
   .foot__in{grid-template-columns:repeat(2,1fr)}
   .head__claim{display:none}
 }
@@ -466,6 +566,21 @@ body.modal-open{overflow:hidden}
   .field-row{grid-template-columns:1fr}
   .grid--4{grid-template-columns:1fr}
   .steps{grid-template-columns:1fr}
+  .gallery{grid-template-columns:repeat(2,1fr);gap:10px}
+  .shot--wide{grid-column:span 2}
+  .shot figcaption{padding:20px 11px 10px}
+  .shot figcaption strong{font-size:.84rem}
+  .shot figcaption span{display:none}
+  /* One short at a time, swiped horizontally — how people watch these */
+  .videos{
+    display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;
+    margin:0 -20px;padding:0 20px 8px;-webkit-overflow-scrolling:touch;
+  }
+  .vid{flex:0 0 62%;scroll-snap-align:center}
+  .tp{padding:22px 18px}
+  .lb__nav{width:42px;height:42px}
+  .lb__nav--prev{left:6px}
+  .lb__nav--next{right:6px}
   .foot__in{grid-template-columns:1fr;gap:28px}
   .head__top-in{min-height:68px}
   .head__topcta{padding:9px 16px;font-size:.88rem}

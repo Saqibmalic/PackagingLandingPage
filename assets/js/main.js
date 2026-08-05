@@ -231,6 +231,105 @@
     });
   }
 
+  /* ================= Work gallery lightbox ================= */
+  var lb      = $('#lightbox');
+  var lbImg   = $('#lb-img');
+  var lbCap   = $('#lb-cap');
+  var shots   = $$('#gallery .shot img');
+  var lbIndex = 0;
+
+  var lbShow = function (i) {
+    if (!shots.length) return;
+    lbIndex = (i + shots.length) % shots.length;
+    var img = shots[lbIndex];
+    lbImg.src = img.currentSrc || img.src;
+    lbImg.alt = img.alt || '';
+    lbCap.textContent = img.getAttribute('data-caption') || img.alt || '';
+  };
+
+  if (lb && shots.length) {
+    shots.forEach(function (img, i) {
+      img.addEventListener('click', function () {
+        lbShow(i);
+        if (typeof lb.showModal === 'function') lb.showModal();
+        else lb.setAttribute('open', '');
+        document.body.classList.add('modal-open');
+        track('gallery_open', { index: i, box: img.getAttribute('data-caption') || '' });
+      });
+    });
+
+    var lbClose = function () {
+      if (typeof lb.close === 'function' && lb.open) lb.close();
+      else lb.removeAttribute('open');
+      document.body.classList.remove('modal-open');
+    };
+
+    $$('[data-lb-close]').forEach(function (b) { b.addEventListener('click', lbClose); });
+    $$('[data-lb-prev]').forEach(function (b) { b.addEventListener('click', function () { lbShow(lbIndex - 1); }); });
+    $$('[data-lb-next]').forEach(function (b) { b.addEventListener('click', function () { lbShow(lbIndex + 1); }); });
+    lb.addEventListener('click', function (e) { if (e.target === lb) lbClose(); });
+    lb.addEventListener('close', function () { document.body.classList.remove('modal-open'); });
+    lb.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowLeft')  lbShow(lbIndex - 1);
+      if (e.key === 'ArrowRight') lbShow(lbIndex + 1);
+    });
+    /* The lightbox CTA should hand over to the quote modal, not just jump */
+    var lbCta = lb.querySelector('.lb__cta');
+    if (lbCta) lbCta.addEventListener('click', function (e) {
+      e.preventDefault();
+      lbClose();
+      openModal(1, 'lightbox');
+    });
+  }
+
+  /* Photos not added yet? Hide the section rather than show broken images. */
+  var gallery = $('#gallery');
+  if (gallery) {
+    var missing = 0, checked = 0;
+    shots.forEach(function (img) {
+      var done = function (ok) {
+        checked++;
+        if (!ok) { missing++; img.closest('.shot').hidden = true; }
+        if (checked === shots.length && missing === shots.length) {
+          var sec = document.getElementById('work');
+          if (sec) sec.hidden = true;
+        }
+      };
+      if (img.complete) done(img.naturalWidth > 0);
+      else {
+        img.addEventListener('load',  function () { done(true); });
+        img.addEventListener('error', function () { done(false); });
+      }
+    });
+  }
+
+  /* ================= Video facades ========================= */
+  /* Nothing is requested from YouTube until someone clicks, so the
+     embeds cost no page weight and cannot affect Core Web Vitals. */
+  $$('.vfacade').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var id = btn.getAttribute('data-video');
+      if (!id || id.indexOf('REPLACE_ID') === 0) return;
+      var frame = document.createElement('iframe');
+      frame.src = 'https://www.youtube-nocookie.com/embed/' + id +
+                  '?autoplay=1&rel=0&modestbranding=1&playsinline=1';
+      frame.title = btn.getAttribute('aria-label') || 'Rigid box video';
+      frame.allow = 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture';
+      frame.allowFullscreen = true;
+      btn.replaceWith(frame);
+      track('video_play', { video_id: id });
+    });
+  });
+
+  /* No real video IDs yet? Drop the section instead of showing dead tiles. */
+  var videoSec = document.getElementById('video');
+  if (videoSec) {
+    var live = $$('.vfacade', videoSec).filter(function (b) {
+      return (b.getAttribute('data-video') || '').indexOf('REPLACE_ID') !== 0;
+    });
+    if (!live.length) videoSec.hidden = true;
+  }
+
   /* ================= Tracking on all CTAs ================== */
   document.addEventListener('click', function (e) {
     var el = e.target.closest('[data-track]');
