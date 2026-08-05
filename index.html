@@ -187,43 +187,8 @@
           <p class="err" data-err></p>
         </div>
 
-        <details class="more">
-          <summary>Add box specs for a sharper quote <span>(optional)</span></summary>
-          <div class="more__in">
-            <div class="field">
-              <label for="f-style">Box style</label>
-              <select id="f-style" name="style">
-                <option value="">Not sure &mdash; recommend one</option>
-                <option>Magnetic closure</option>
-                <option>Two-piece lid &amp; base</option>
-                <option>Drawer / slide-out</option>
-                <option>Shoulder neck</option>
-                <option>Book style</option>
-                <option>Telescoping</option>
-                <option>Collapsible rigid</option>
-                <option>Rigid mailer</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="f-size">Size &mdash; L &times; W &times; H (inches)</label>
-              <input id="f-size" name="size" type="text" placeholder="e.g. 8 × 6 × 3">
-            </div>
-            <fieldset class="field">
-              <legend>Finishing</legend>
-              <div class="chips">
-                <label class="chip"><input type="checkbox" name="finish[]" value="Foil stamping"><span>Foil stamping</span></label>
-                <label class="chip"><input type="checkbox" name="finish[]" value="Emboss / deboss"><span>Emboss / deboss</span></label>
-                <label class="chip"><input type="checkbox" name="finish[]" value="Soft-touch matte"><span>Soft-touch</span></label>
-                <label class="chip"><input type="checkbox" name="finish[]" value="Spot UV"><span>Spot UV</span></label>
-                <label class="chip"><input type="checkbox" name="finish[]" value="Custom insert"><span>Custom insert</span></label>
-              </div>
-            </fieldset>
-            <div class="field">
-              <label for="f-notes">Anything else?</label>
-              <textarea id="f-notes" name="notes" rows="3" placeholder="Product going inside, deadline, a reference box or brand, Pantone colors…"></textarea>
-            </div>
-          </div>
-        </details>
+        <p class="formcard__note">Next step asks for box size and finishing &mdash; takes about 40 seconds, and you can skip it.</p>
+
 
         <button class="btn btn--primary btn--block" type="submit" data-track="form-submit">
           Get My Free Quote &amp; 3D Mockup
@@ -619,6 +584,190 @@
   </a>
   <a class="sticky__quote" href="#quote" data-track="cta-sticky">Get Free Quote</a>
 </div>
+
+<!-- ════════════════════════════════════════════════════════════
+     QUOTE MODAL — two steps.
+     Step 1 (contact) submits by itself and is banked as a lead the
+     moment it completes, so an abandon on step 2 still leaves you a
+     contactable person. Step 2 enriches that same lead record.
+     ════════════════════════════════════════════════════════════ -->
+<dialog class="modal" id="quote-modal" aria-labelledby="modal-title">
+  <div class="modal__box">
+
+    <header class="modal__head">
+      <div>
+        <p class="modal__step" id="modal-step">Step 1 of 2 &middot; Contact</p>
+        <h2 id="modal-title">Get your free 3D mockup &amp; quote</h2>
+      </div>
+      <button type="button" class="modal__x" data-modal-close aria-label="Close quote form">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg>
+      </button>
+    </header>
+
+    <div class="modal__bar"><span id="modal-progress" style="width:50%"></span></div>
+
+    <div class="modal__body">
+
+      <!-- ── Step 1: contact ───────────────────────────────── -->
+      <form class="form modal__pane" id="modal-step1" method="post" action="submit-lead.php" novalidate>
+        <div class="hp" aria-hidden="true"><label>Company website<input type="text" name="website_hp" tabindex="-1" autocomplete="off"></label></div>
+
+        <p class="modal__lede">Four fields to start. A rigid box specialist replies within one business hour.</p>
+
+        <div class="field">
+          <label for="m-name">Full name <span class="req">*</span></label>
+          <input id="m-name" name="name" type="text" autocomplete="name" required placeholder="Jordan Reyes">
+          <p class="err" data-err></p>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="m-email">Work email <span class="req">*</span></label>
+            <input id="m-email" name="email" type="email" autocomplete="email" inputmode="email" required placeholder="you@brand.com">
+            <p class="err" data-err></p>
+          </div>
+          <div class="field">
+            <label for="m-phone">Phone <span class="req">*</span></label>
+            <input id="m-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required placeholder="(555) 010-2233">
+            <p class="err" data-err></p>
+          </div>
+        </div>
+        <div class="field">
+          <label for="m-qty">Quantity needed <span class="req">*</span></label>
+          <select id="m-qty" name="quantity" required>
+            <option value="" selected disabled>Select quantity</option>
+            <option>100 – 250</option><option>250 – 500</option><option>500 – 1,000</option>
+            <option>1,000 – 5,000</option><option>5,000 – 10,000</option><option>10,000+</option>
+            <option>Not sure yet</option>
+          </select>
+          <p class="err" data-err></p>
+        </div>
+
+        <button class="btn btn--primary btn--block" type="submit" data-track="form-submit">Continue to box specs</button>
+
+        <p class="consent">
+          By submitting, you agree that Custom Boxes Experts may contact you by phone, email or SMS about your
+          packaging inquiry. Message and data rates may apply. Consent is not a condition of purchase.
+          See our <a href="privacy-policy.html">Privacy&nbsp;Policy</a>.
+        </p>
+      </form>
+
+      <!-- ── Step 2: box specification ─────────────────────── -->
+      <form class="form modal__pane" id="spec-form" method="post" action="submit-lead.php"
+            enctype="multipart/form-data" novalidate hidden>
+        <input type="hidden" name="stage" value="2">
+        <input type="hidden" name="lead_id" id="spec-lead-id" value="">
+
+        <p class="modal__saved">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Your details are saved &mdash; we can reach you either way. These specs just make the quote exact.
+        </p>
+
+        <fieldset class="field">
+          <legend>Box size <span class="req">*</span></legend>
+          <div class="dims">
+            <label class="dim"><span>Length</span><input name="length" type="number" min="0" step="0.125" inputmode="decimal" placeholder="8"></label>
+            <label class="dim"><span>Width</span><input name="width" type="number" min="0" step="0.125" inputmode="decimal" placeholder="6"></label>
+            <label class="dim"><span>Depth</span><input name="depth" type="number" min="0" step="0.125" inputmode="decimal" placeholder="3"></label>
+            <label class="dim"><span>Units</span>
+              <select name="units"><option value="in" selected>Inches</option><option value="cm">Centimetres</option><option value="mm">Millimetres</option></select>
+            </label>
+          </div>
+          <p class="hint">Length = left to right, Width = front to back, Depth = top to bottom. Not sure? Leave it blank and we&rsquo;ll size it around your product.</p>
+        </fieldset>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="s-style">Box style</label>
+            <select id="s-style" name="style">
+              <option value="">Not sure &mdash; recommend one</option>
+              <option>Magnetic closure</option><option>Two-piece lid &amp; base</option>
+              <option>Drawer / slide-out</option><option>Shoulder neck</option>
+              <option>Book style</option><option>Telescoping</option>
+              <option>Collapsible rigid</option><option>Rigid mailer</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="s-board">Board thickness</label>
+            <select id="s-board" name="board">
+              <option value="">Recommend for my product</option>
+              <option>1.5mm greyboard</option><option>2mm greyboard (standard)</option>
+              <option>2.5mm greyboard</option><option>3mm greyboard</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="s-wrap">Wrap stock</label>
+            <select id="s-wrap" name="wrap">
+              <option value="">Not sure yet</option>
+              <option>Printed art paper (CMYK)</option><option>Specialty &mdash; linen / felt / leatherette</option>
+              <option>Uncoated colorplan</option><option>Kraft / recycled</option><option>FSC&reg;-certified stock</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="s-insert">Insert</label>
+            <select id="s-insert" name="insert">
+              <option value="">No insert / not sure</option>
+              <option>EVA or PU foam</option><option>Paperboard platform or divider</option>
+              <option>Molded pulp (plastic-free)</option><option>Satin or velvet lined</option><option>Thermoformed PET</option>
+            </select>
+          </div>
+        </div>
+
+        <fieldset class="field">
+          <legend>Finishing</legend>
+          <div class="chips">
+            <label class="chip"><input type="checkbox" name="finish[]" value="Foil stamping"><span>Foil stamping</span></label>
+            <label class="chip"><input type="checkbox" name="finish[]" value="Emboss / deboss"><span>Emboss / deboss</span></label>
+            <label class="chip"><input type="checkbox" name="finish[]" value="Soft-touch matte"><span>Soft-touch matte</span></label>
+            <label class="chip"><input type="checkbox" name="finish[]" value="Spot UV"><span>Spot UV</span></label>
+            <label class="chip"><input type="checkbox" name="finish[]" value="Gloss lamination"><span>Gloss lamination</span></label>
+            <label class="chip"><input type="checkbox" name="finish[]" value="Ribbon pull"><span>Ribbon pull</span></label>
+          </div>
+        </fieldset>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="s-qty2">Compare a second quantity <span class="opt">(optional)</span></label>
+            <input id="s-qty2" name="quantity2" type="text" inputmode="numeric" placeholder="e.g. 1,000">
+          </div>
+          <div class="field">
+            <label for="s-date">Need it in hand by</label>
+            <input id="s-date" name="need_by" type="date">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="s-files">Upload artwork or a reference photo <span class="opt">(optional)</span></label>
+          <div class="upload">
+            <input id="s-files" name="artwork[]" type="file" multiple accept=".jpg,.jpeg,.png,.pdf,.ai,.eps,.zip">
+            <p class="upload__hint">JPG, PNG, PDF, AI, EPS or ZIP &mdash; up to 5 files, 20MB each. A photo of a box you like works just as well as a dieline.</p>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="s-notes">Anything else we should know?</label>
+          <textarea id="s-notes" name="notes" rows="3" placeholder="Product going inside, launch deadline, a competitor's box you want matched, Pantone colors…"></textarea>
+        </div>
+
+        <button class="btn btn--primary btn--block" type="submit" data-track="spec-submit">Send My Specs &amp; Get the Quote</button>
+        <button type="button" class="modal__skip" data-modal-skip>Skip &mdash; I&rsquo;ll send specs later</button>
+      </form>
+
+      <!-- ── Skip confirmation ─────────────────────────────── -->
+      <div class="modal__pane modal__done" id="modal-done" hidden>
+        <span class="ty__tick modal__tick"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <h3>You&rsquo;re in the queue</h3>
+        <p>A specialist has your details and will reach out within one business hour to pin down the specs.
+        Want to skip the wait?</p>
+        <a class="btn btn--primary" href="tel:+18887161078" data-track="phone-modal">Call (888) 716-1078</a>
+        <button type="button" class="modal__skip" data-modal-close>Close</button>
+      </div>
+
+    </div>
+  </div>
+</dialog>
 
 <script src="assets/js/main.js" defer></script>
 </body>

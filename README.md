@@ -6,15 +6,44 @@ customboxesexperts.com theme (navy `#1A3163`, amber `#F2A65A`, mint `#D0F3EC`, c
 Static HTML/CSS/JS — no build step, no framework, no dependencies. Drop it on any host.
 
 ```
-index.html            The landing page
+index.html            The landing page + two-step quote modal
 thank-you.html        Post-submit page (noindex) where the conversion fires
 privacy-policy.html   Required by Google Ads — must be reachable
 terms.html            Trust/transparency signal for landing page quality
-submit-lead.php       Optional PHP lead handler (email + CSV backup + redirect)
+submit-lead.php       Optional PHP lead handler (2 stages, uploads, CSV backup)
 robots.txt
 assets/css/styles.css All styling. Brand tokens live in :root at the top.
-assets/js/main.js     Validation, tracking events, gclid/UTM pass-through
+assets/js/main.js     Two-step flow, validation, tracking, gclid/UTM capture
+uploads/              Created on first artwork upload (see Security below)
 ```
+
+## The two-step quote flow
+
+Every "get a quote" button opens a modal. The hero form is step 1 inline; both paths land in
+the same place.
+
+```
+Step 1 — name, email, phone, quantity
+   │     ↓ posts on its own, gets a lead_id back
+   │     ↓ LEAD CONVERSION FIRES HERE
+   │     ↓ you receive "New Rigid Box Lead — call this person now"
+   ▼
+Step 2 — L×W×D + units, style, board, wrap, insert, finishing,
+         compare quantity, in-hands date, artwork upload, notes
+         ↓ posts as a follow-up against the same lead_id
+         ↓ you receive "Box Specs Added [LEAD ID]"
+         └─ or they hit "Skip — I'll send specs later" and you
+            still have a fully contactable lead
+```
+
+**Why step 1 posts by itself:** a long spec form that only submits at the end throws away every
+buyer who quits halfway. Here the contact record is banked the moment it is complete, so the
+detailed questions can be as thorough as you like without costing you leads. The Google Ads
+conversion fires at step 1 for the same reason — that is the moment you actually got something
+of value.
+
+If JavaScript is unavailable the hero form posts normally as a complete stage-1 lead and
+redirects to the thank-you page. Nothing is lost.
 
 ---
 
@@ -52,8 +81,17 @@ Upload the files to that folder. The PHP handler needs PHP 7.4+ and a working `m
 setup; if your host blocks `mail()`, use Formspree, a CRM webhook or Zapier and set the form
 `action` to that endpoint instead.
 
+### Security — read this before enabling uploads
+
 **Move `leads.csv` outside the web root** if your host allows it — it is a plain-text backup of
 every lead. `robots.txt` blocks crawlers from it, but that is not access control.
+
+The artwork upload accepts `jpg, jpeg, png, pdf, ai, eps, zip` only, caps files at 5 × 20MB,
+discards the original filename in favour of a random one, and drops an `.htaccess` into
+`uploads/` that disables the PHP engine and denies direct access. That combination is what stops
+an upload form from becoming a way to run code on your server. If your host runs nginx (where
+`.htaccess` does nothing), move `$UPLOAD_DIR` outside the web root or add an nginx rule denying
+execution in that directory — otherwise disable the upload field.
 
 Add these to `.htaccess` for speed (Core Web Vitals feed into landing page experience):
 
@@ -161,7 +199,34 @@ packaging competitors get wrong. Specific choices here:
   can tie a closed deal back to the exact keyword — and later upload offline conversions to teach
   Smart Bidding which leads were actually worth money.
 
-## 5. What to test first
+## 5. On adding Packlane-style instant pricing
+
+Recommended: **no, not for rigid boxes, and not while this is a lead-gen page.** Three reasons.
+
+**The math doesn't close.** Packlane prices a small, constrained catalogue — a few corrugated
+styles, a fixed material list, a fixed print option set. That is a small enough grid to solve
+algorithmically. Rigid boxes are hand-assembled with variable wraps, magnets, foil, ribbon,
+inserts and specialty stocks; the price surface is large and non-linear. A calculator over that
+either quotes below cost on the awkward combinations or pads every cell to stay safe — which
+makes you look expensive against competitors who quote by hand.
+
+**It fights your own funnel.** Packlane is e-commerce: instant price, self-serve checkout, no
+salesperson. This page is lead-gen: the price *is* the reason to hand over a phone number. Give
+the number away for free and the form loses its job. You would be paying $8–25 a click to show
+people a price and then hoping they come back.
+
+**It creates disputes.** A displayed price that a human later corrects upward is the fastest way
+to lose a deal you had already won.
+
+**The version worth building instead:** an *estimate* widget that takes size, quantity and
+finishing and returns a **range** ("boxes like this typically run $2.40–$3.60 each"), then asks
+for contact details to "lock the exact price and get a free 3D mockup." You get the engagement
+and the transparency signal, you keep the lead capture, and you are never wrong because you never
+quoted a number. If you want this, I need your real cost matrix — board and wrap cost per square
+inch, per-process finishing costs, assembly labour per style, and your quantity break curve.
+Without those it would just be invented numbers.
+
+## 6. What to test first
 
 1. **Headline** — brand-emotional (current) vs. spec-direct (`Custom Rigid Boxes From 100 Units — Quote in 1 Hour`).
 2. **Offer** — free 3D mockup (current) vs. free physical sample. The sample offer lifts lead quality and cuts volume.
