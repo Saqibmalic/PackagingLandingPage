@@ -87,9 +87,12 @@ $csv = static function (array $row) use ($CSV_BACKUP) {
     $header = ['timestamp','lead_id','stage','name','email','phone','quantity','quantity2',
                'length','width','depth','units','style','board','wrap','insert','finish',
                'need_by','notes','files','gclid','utm_source','utm_medium','utm_campaign','utm_term','utm_content'];
+    // Decide on the header before opening: in append mode ftell() reports 0
+    // until the first write, so it cannot tell us whether the file is empty.
+    $needsHeader = !file_exists($CSV_BACKUP) || filesize($CSV_BACKUP) === 0;
     if ($fh = @fopen($CSV_BACKUP, 'a')) {
         if (flock($fh, LOCK_EX)) {
-            if (ftell($fh) === 0) {
+            if ($needsHeader) {
                 fputcsv($fh, $header);
             }
             fputcsv($fh, $row);
@@ -98,6 +101,21 @@ $csv = static function (array $row) use ($CSV_BACKUP) {
         fclose($fh);
     }
 };
+
+// ── Accept a JSON body as well as a normal form POST ─────────
+// The landing page sends JSON so the same payload works against either
+// this file or the Google Apps Script endpoint. Files arrive base64.
+$JSON_FILES = [];
+$raw = file_get_contents('php://input');
+if ($raw !== '' && $raw[0] === '{') {
+    $decoded = json_decode($raw, true);
+    if (is_array($decoded)) {
+        $JSON_FILES = is_array($decoded['files'] ?? null) ? $decoded['files'] : [];
+        unset($decoded['files']);
+        $_POST = array_merge($_POST, $decoded);
+        $isAjax = true;
+    }
+}
 
 // ── Guards ───────────────────────────────────────────────────
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
@@ -138,7 +156,11 @@ if ($stage === 1) {
         $fail('Please go back and check these fields: ' . implode(', ', $errors), 422);
     }
 
-    $leadId = strtoupper(substr(bin2hex(random_bytes(4)), 0, 8));
+    // The page mints the id so both stages agree on it; fall back if absent.
+    $leadId = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $clean('lead_id', 12)));
+    if ($leadId === '') {
+        $leadId = strtoupper(substr(bin2hex(random_bytes(4)), 0, 8));
+    }
 
     $body = implode("\n", [
         'NEW RIGID BOX LEAD — contact captured',
@@ -194,6 +216,32 @@ $notes     = $clean('notes', 2000);
 
 // ── Artwork uploads ──────────────────────────────────────────
 $saved = [];
+
+// Artwork sent as base64 inside the JSON payload.
+if ($JSON_FILES) {
+    if (!is_dir($UPLOAD_DIR)) {
+        @mkdir($UPLOAD_DIR, 0755, true);
+    }
+    $guard = $UPLOAD_DIR . '/.htaccess';
+    if (!file_exists($guard)) {
+        @file_put_contents($guard, "php_flag engine off\nRemoveHandler .php .phtml .php3 .php4 .php5 .php7 .phps\nDeny from all\n");
+    }
+    foreach (array_slice($JSON_FILES, 0, $MAX_FILES) as $f) {
+        $ext = strtolower(pathinfo((string) ($f['name'] ?? ''), PATHINFO_EXTENSION));
+        if (!in_array($ext, $ALLOWED_EXT, true)) {
+            continue;
+        }
+        $bytes = base64_decode((string) ($f['data'] ?? ''), true);
+        if ($bytes === false || strlen($bytes) > $MAX_BYTES) {
+            continue;
+        }
+        $safeName = ($leadId !== '' ? $leadId . '-' : '') . bin2hex(random_bytes(6)) . '.' . $ext;
+        if (@file_put_contents($UPLOAD_DIR . '/' . $safeName, $bytes) !== false) {
+            $saved[] = $safeName . ' (was "' . preg_replace('/[^\w.\- ]/', '', (string) $f['name']) . '")';
+        }
+    }
+}
+
 if (!empty($_FILES['artwork']['name'][0])) {
     if (!is_dir($UPLOAD_DIR)) {
         @mkdir($UPLOAD_DIR, 0755, true);

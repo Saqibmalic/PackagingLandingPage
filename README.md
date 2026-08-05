@@ -10,7 +10,8 @@ index.html            The landing page + two-step quote modal
 thank-you.html        Post-submit page (noindex) where the conversion fires
 privacy-policy.html   Required by Google Ads — must be reachable
 terms.html            Trust/transparency signal for landing page quality
-submit-lead.php       Optional PHP lead handler (2 stages, uploads, CSV backup)
+submit-lead.php       PHP lead handler (2 stages, uploads, CSV backup)
+google-apps-script.gs Google Sheets backend — no server needed (see section 2)
 robots.txt
 assets/css/styles.css All styling. Brand tokens live in :root at the top.
 assets/js/main.js     Two-step flow, validation, tracking, gclid/UTM capture
@@ -55,8 +56,8 @@ redirects to the thank-you page. Nothing is lost.
 | 2 | Replace `G-XXXXXXXXXX` with your GA4 measurement ID | `index.html`, `thank-you.html` (head) |
 | 3 | Replace `REPLACE_LEAD_LABEL` / `REPLACE_CALL_LABEL` conversion labels | `assets/js/main.js` (top), `thank-you.html` |
 | 4 | Replace the three `REPLACE —` testimonials with **real, attributable** quotes | `index.html` → `#reviews` |
-| 5 | Point the form at your handler (PHP file, CRM, or Zapier webhook) | `index.html` → `<form action="…">` |
-| 6 | Set the recipient email in the PHP handler | `submit-lead.php` → `$TO`, `$FROM` |
+| 5 | Choose your backend and set `BACKEND` (see section 2) | `assets/js/main.js` (top) |
+| 6 | Set the recipient email — `NOTIFY_EMAIL` (Sheets) or `$TO`/`$FROM` (PHP) | `google-apps-script.gs` / `submit-lead.php` |
 | 7 | Update `<link rel="canonical">` and the OG URLs to the real URL | `index.html` (head) |
 | 8 | Confirm turnaround, MOQ and price ranges match what sales can actually deliver | `index.html` throughout |
 
@@ -72,7 +73,60 @@ lead-gen page is hard to reverse.
 
 ---
 
-## 2. Deployment
+## 2. Where the leads go — pick one
+
+Set `BACKEND` at the top of `assets/js/main.js`. Both options receive the identical JSON
+payload, so you can switch later without touching anything else.
+
+### Option A — Google Sheet (recommended if your agents work from a sheet)
+
+One row per lead. Stage 1 creates the row with a **"New — call now"** status; stage 2 fills the
+spec columns in the *same row* and flips the status to **"Specs received"**. Artwork is saved to
+a Drive folder with the links in the row. You also get an email alert per stage.
+
+Setup is in the header comment of `google-apps-script.gs` — about 5 minutes:
+create a sheet → Extensions → Apps Script → paste the file → Deploy as Web app
+(**Execute as: Me**, **Who has access: Anyone**) → copy the `/exec` URL → paste it into
+`BACKEND` as `{ mode: 'sheets', url: '…/exec' }`.
+
+Sheet columns: `Timestamp · Lead ID · Status · Name · Email · Phone · Quantity · Compare Qty ·
+Length · Width · Depth · Units · Box Style · Board · Wrap Stock · Insert · Finishing ·
+Needed By · Notes · Artwork · GCLID · Source · Medium · Campaign · Keyword · Content · Page URL`
+
+`Status` is a plain text cell — have your agents overwrite it with Contacted / Quoted / Won /
+Lost. The `GCLID` column is what you will need later for offline conversion uploads.
+
+This option needs **no server at all**, which means the page can live on free static hosting.
+
+### Option B — `submit-lead.php` on your own hosting
+
+Emails each stage to `$TO` and appends to `leads.csv`, saving artwork under `uploads/`.
+Needs PHP 7.4+ and a working `mail()`. This is the default in the shipped config.
+
+You can also point `BACKEND.url` at a Zapier or Make webhook, or a CRM endpoint — anything that
+accepts a JSON POST. The payload keys are the field `name` attributes plus `stage`, `lead_id`,
+`gclid`, the `utm_*` set, `page_url`, and `files[]` as `{name, type, data}` with base64 `data`.
+
+## 3. Testing it on a throwaway domain
+
+The page is static, so with **Option A** the whole thing — including the form writing to your
+sheet — works on free hosting in a couple of minutes:
+
+| Host | How | Notes |
+|---|---|---|
+| **GitHub Pages** | Repo → Settings → Pages → Source: this branch, folder `/` | Fastest, the code is already pushed. URL: `https://<user>.github.io/PackagingLandingPage/` |
+| **Netlify Drop** | Drag the project folder onto [app.netlify.com/drop](https://app.netlify.com/drop) | No account needed to start, instant HTTPS URL |
+| **Cloudflare Pages** | Connect the repo, framework preset "None" | Free custom domains |
+
+All three are static-only, so `submit-lead.php` will **not** run on them — use Option A for the
+test. Add `?gclid=TEST123&utm_campaign=test` to the URL when you try it, then confirm those
+values land in the sheet.
+
+Before pointing real ad spend at a test domain, note that the canonical tag and structured data
+still reference `customboxesexperts.com`. That is correct for production but means a test host is
+telling Google the real page lives elsewhere — fine for testing, wrong for a live campaign.
+
+## 4. Deployment
 
 Recommended URL: `https://www.customboxesexperts.com/custom-rigid-boxes/`
 (a real subfolder on the main domain — inherits domain trust, keeps the ad destination on-brand).
@@ -108,7 +162,7 @@ Add these to `.htaccess` for speed (Core Web Vitals feed into landing page exper
 
 ---
 
-## 3. Google Ads setup
+## 5. Google Ads setup
 
 ### Conversion actions
 Create two, both **Primary**:
@@ -174,7 +228,7 @@ Add a **call extension** with (888) 716-1078 and a **lead form asset** as a back
 
 ---
 
-## 4. Why the page is built this way
+## 6. Why the page is built this way
 
 Landing page experience is one of the three Quality Score components, and it is the one most
 packaging competitors get wrong. Specific choices here:
@@ -199,7 +253,7 @@ packaging competitors get wrong. Specific choices here:
   can tie a closed deal back to the exact keyword — and later upload offline conversions to teach
   Smart Bidding which leads were actually worth money.
 
-## 5. On adding Packlane-style instant pricing
+## 7. On adding Packlane-style instant pricing
 
 Recommended: **no, not for rigid boxes, and not while this is a lead-gen page.** Three reasons.
 
@@ -226,7 +280,7 @@ quoted a number. If you want this, I need your real cost matrix — board and wr
 inch, per-process finishing costs, assembly labour per style, and your quantity break curve.
 Without those it would just be invented numbers.
 
-## 6. What to test first
+## 8. What to test first
 
 1. **Headline** — brand-emotional (current) vs. spec-direct (`Custom Rigid Boxes From 100 Units — Quote in 1 Hour`).
 2. **Offer** — free 3D mockup (current) vs. free physical sample. The sample offer lifts lead quality and cuts volume.

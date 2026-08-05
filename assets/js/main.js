@@ -21,7 +21,23 @@
     call: 'AW-XXXXXXXXXX/REPLACE_CALL_LABEL'
   };
 
-  var ENDPOINT = 'submit-lead.php';
+  /* ---- Where leads go ---------------------------------------
+     'sheets' — Google Apps Script web app writing to a Google Sheet.
+                Works on any static host (GitHub Pages, Netlify, S3).
+                Paste your /exec URL below. See google-apps-script.gs.
+     'php'    — submit-lead.php on your own PHP hosting.
+     Both receive the same JSON payload.
+     ---------------------------------------------------------- */
+  var BACKEND = {
+    mode: 'php',
+    url:  'submit-lead.php'
+    /* Google Sheets instead? Use:
+       mode: 'sheets',
+       url:  'https://script.google.com/macros/s/PASTE_YOUR_DEPLOYMENT_ID/exec'  */
+  };
+
+  var MAX_FILES = 5;
+  var MAX_FILE_BYTES = 10 * 1024 * 1024;   // 10MB — base64 inflates payloads ~33%
 
   var $  = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
@@ -106,6 +122,43 @@
     var qs = new URLSearchParams(location.search), out = { page_url: location.href };
     ['gclid', 'gbraid', 'wbraid', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content']
       .forEach(function (k) { if (qs.get(k)) out[k] = qs.get(k); });
+    return out;
+  };
+
+  /* ---- Lead id, minted on the client -----------------------
+     Generating it here means the flow never depends on being able
+     to read the server's response — which matters because a Google
+     Apps Script endpoint is cross-origin. Both stages send the same
+     id and the backend keys the record on it. */
+  var leadId = null;
+  var newLeadId = function () {
+    var s = '', hex = '0123456789ABCDEF';
+    for (var i = 0; i < 8; i++) s += hex[Math.floor(Math.random() * 16)];
+    return s;
+  };
+
+  /* ---- One transport for both backends --------------------- */
+  var post = function (payload) {
+    return fetch(BACKEND.url, {
+      method: 'POST',
+      /* text/plain keeps this a "simple" CORS request, so the browser
+         sends no preflight — Apps Script cannot answer OPTIONS. */
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    });
+  };
+
+  var formValues = function (form) {
+    var out = {};
+    new FormData(form).forEach(function (v, k) {
+      if (v instanceof File) return;
+      if (k.slice(-2) === '[]') {
+        var key = k.slice(0, -2);
+        (out[key] = out[key] || []).push(v);
+      } else {
+        out[k] = v;
+      }
+    });
     return out;
   };
 
@@ -198,15 +251,14 @@
   });
 
   /* ================= Step 1 submission ===================== */
-  /* Posts the contact record, receives a lead_id, advances to specs.
-     If the request fails we fall back to a normal form POST so a
-     lead is never silently lost. */
+  /* Posts the contact record, then advances to specs. The lead is
+     considered captured the moment this succeeds. */
   var submitStep1 = function (form, e) {
-    var hp = form.querySelector('input[name="website_hp"]');
-    if (hp && hp.value) { e.preventDefault(); return; }          // bot
-    if (!validateForm(form)) { e.preventDefault(); return; }
-
     e.preventDefault();
+
+    var hp = form.querySelector('input[name="website_hp"]');
+    if (hp && hp.value) return;                          // bot
+    if (!validateForm(form)) return;
 
     track('conversion', { send_to: CONVERSIONS.lead });
     track('generate_lead', { form: form.id, value: 1, currency: 'USD' });
@@ -215,22 +267,25 @@
     var label = btn ? btn.textContent : '';
     if (btn) { btn.disabled = true; btn.textContent = 'Saving your details…'; }
 
-    var data = new FormData(form);
-    data.append('stage', '1');
+    leadId = leadId || newLeadId();
+    var payload = formValues(form);
+    payload.stage = '1';
+    payload.lead_id = leadId;
     var ctx = adContext();
-    Object.keys(ctx).forEach(function (k) { data.append(k, ctx[k]); });
+    Object.keys(ctx).forEach(function (k) { payload[k] = ctx[k]; });
 
-    fetch(ENDPOINT, { method: 'POST', body: data, headers: { 'X-Requested-With': 'fetch' } })
-      .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
-      .then(function (res) {
-        $('#spec-lead-id').value = res.lead_id || '';
-        if (!modal.open && !modal.hasAttribute('open')) openModal(2, 'step1-complete');
-        else showPane(2);
-        track('contact_step_complete', {});
-      })
+    var advance = function () {
+      $('#spec-lead-id').value = leadId;
+      if (modal && (modal.open || modal.hasAttribute('open'))) showPane(2);
+      else openModal(2, 'step1-complete');
+      track('contact_step_complete', {});
+    };
+
+    post(payload)
+      .then(advance)
       .catch(function () {
-        /* Network or server failure — submit the old-fashioned way
-           so the lead still reaches the inbox. */
+        /* Endpoint unreachable. Fall back to a native form POST so the
+           lead still reaches you rather than vanishing. */
         form.removeEventListener('submit', form._handler);
         form.submit();
       })
@@ -247,33 +302,67 @@
   });
 
   /* ================= Step 2 submission ===================== */
+  /* Reads any artwork as base64 so specs and files travel in one
+     JSON payload — the same shape for both backends. */
+  var readFile = function (file) {
+    return new Promise(function (resolve, reject) {
+      var fr = new FileReader();
+      fr.onload = function () {
+        resolve({
+          name: file.name,
+          type: file.type || 'application/octet-stream',
+          data: String(fr.result).split(',')[1]          // strip the data: prefix
+        });
+      };
+      fr.onerror = reject;
+      fr.readAsDataURL(file);
+    });
+  };
+
   if (specForm) {
     specForm.addEventListener('submit', function (e) {
-      var files = $('#s-files');
-      if (files && files.files.length > 5) {
-        e.preventDefault();
-        alert('Please attach no more than 5 files. Email the rest to info@customboxesexperts.com and we will match them to your quote.');
+      e.preventDefault();
+
+      var input = $('#s-files');
+      var files = input ? Array.prototype.slice.call(input.files) : [];
+
+      if (files.length > MAX_FILES) {
+        alert('Please attach no more than ' + MAX_FILES + ' files. Email the rest to ' +
+              'info@customboxesexperts.com and we will match them to your quote.');
         return;
       }
-      if (files) {
-        for (var i = 0; i < files.files.length; i++) {
-          if (files.files[i].size > 20 * 1024 * 1024) {
-            e.preventDefault();
-            alert('"' + files.files[i].name + '" is larger than 20MB. Please send it to info@customboxesexperts.com instead.');
-            return;
-          }
-        }
+      var oversize = files.filter(function (f) { return f.size > MAX_FILE_BYTES; });
+      if (oversize.length) {
+        alert('"' + oversize[0].name + '" is larger than ' + (MAX_FILE_BYTES / 1048576) +
+              'MB. Please email it to info@customboxesexperts.com instead.');
+        return;
       }
-      var ctx = adContext();
-      Object.keys(ctx).forEach(function (k) {
-        if (specForm.querySelector('[name="' + k + '"]')) return;
-        var h = document.createElement('input');
-        h.type = 'hidden'; h.name = k; h.value = ctx[k];
-        specForm.appendChild(h);
-      });
-      track('spec_step_complete', {});
+
       var btn = specForm.querySelector('button[type=submit]');
+      var label = btn ? btn.textContent : '';
       if (btn) { btn.disabled = true; btn.textContent = 'Sending your specs…'; }
+
+      var payload = formValues(specForm);
+      payload.stage = '2';
+      payload.lead_id = leadId || $('#spec-lead-id').value || newLeadId();
+      var ctx = adContext();
+      Object.keys(ctx).forEach(function (k) { payload[k] = ctx[k]; });
+
+      Promise.all(files.map(readFile))
+        .then(function (encoded) {
+          payload.files = encoded;
+          return post(payload);
+        })
+        .then(function () {
+          track('spec_step_complete', {});
+          location.href = 'thank-you.html';
+        })
+        .catch(function () {
+          if (btn) { btn.disabled = false; btn.textContent = label; }
+          alert('We could not send the specs just now, but your contact details are already ' +
+                'saved and a specialist will call you. You can also reach us on (888) 716-1078.');
+          showPane(3);
+        });
     });
   }
 })();

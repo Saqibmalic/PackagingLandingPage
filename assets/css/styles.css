@@ -454,7 +454,9 @@ body.modal-open{overflow:hidden}
   .specs{grid-template-columns:1fr}
   .head__bar-in{min-height:0;padding-top:10px;padding-bottom:10px}
   .head__nav{display:none}
-  .head__contact{width:100%;justify-content:center;gap:8px 20px;font-size:.88rem}
+  /* Thumb-sized tap targets for the phone/email links on touch devices */
+  .head__contact{width:100%;justify-content:center;gap:2px 14px;font-size:.88rem}
+  .head__contact a{min-height:44px;padding:4px 6px}
 }
 @media (max-width:640px){
   body{font-size:16px}
