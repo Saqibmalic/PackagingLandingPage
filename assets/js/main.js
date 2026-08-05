@@ -29,12 +29,18 @@
      Both receive the same JSON payload.
      ---------------------------------------------------------- */
   var BACKEND = {
-    mode: 'php',
-    url:  'submit-lead.php'
-    /* Google Sheets instead? Use:
-       mode: 'sheets',
-       url:  'https://script.google.com/macros/s/PASTE_YOUR_DEPLOYMENT_ID/exec'  */
+    mode: 'sheets',
+    url:  'PASTE_YOUR_APPS_SCRIPT_EXEC_URL_HERE'
+    /* Own PHP hosting instead? Use:
+       mode: 'php',
+       url:  'submit-lead.php'                                                    */
   };
+
+  if (BACKEND.url.indexOf('PASTE_YOUR') === 0) {
+    console.warn('[Custom Boxes Experts] No lead endpoint configured. ' +
+                 'Deploy google-apps-script.gs and paste the /exec URL into BACKEND.url ' +
+                 'in assets/js/main.js — until you do, form submissions will not be saved.');
+  }
 
   var MAX_FILES = 5;
   var MAX_FILE_BYTES = 10 * 1024 * 1024;   // 10MB — base64 inflates payloads ~33%
