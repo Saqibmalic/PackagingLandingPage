@@ -51,10 +51,10 @@
      to upload. Leave them empty and the whole section stays hidden.
      ---------------------------------------------------------- */
   var SHORTS = [
-    '',   // e.g. 'https://www.youtube.com/shorts/AbCdEfGhIjK | Magnetic closure unboxing'
-    '',
-    '',
-    ''
+    'https://www.youtube.com/shorts/CENCqM33ino',   // e.g. 'https://www.youtube.com/shorts/AbCdEfGhIjK | Magnetic closure unboxing'
+    'https://www.youtube.com/shorts/-sCSFOT5Nmk',
+    'https://www.youtube.com/shorts/mUTy10ssnS0',
+    'https://www.youtube.com/shorts/HDSudQpWsdM'
   ];
 
   /* ---- Sister-brand Trustpilot ------------------------------
