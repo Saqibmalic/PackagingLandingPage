@@ -57,7 +57,8 @@ redirects to the thank-you page. Nothing is lost.
 | 2 | Replace `G-XXXXXXXXXX` with your GA4 measurement ID | `index.html`, `thank-you.html` (head) |
 | 3 | Replace `REPLACE_LEAD_LABEL` / `REPLACE_CALL_LABEL` conversion labels | `assets/js/main.js` (top), `thank-you.html` |
 | 4 | Replace the three `REPLACE —` testimonials with **real, attributable** quotes | `index.html` → `#reviews` |
-| 4b | Add your box photos, video IDs, and the Trustpilot RATING/COUNT (see sections 5–6) | `assets/img/`, `index.html` |
+| 4b | Add your box photos (section 5) | `assets/img/boxes/` |
+| 4c | Paste your Shorts links into `SHORTS` and the Trustpilot figures into `TRUSTPILOT` (sections 5–6) | `assets/js/main.js` (top) |
 | 5 | Choose your backend and set `BACKEND` (see section 2) | `assets/js/main.js` (top) |
 | 6 | Set the recipient email — `NOTIFY_EMAIL` (Sheets) or `$TO`/`$FROM` (PHP) | `google-apps-script.gs` / `submit-lead.php` |
 | 7 | Update `<link rel="canonical">` and the OG URLs to the real URL | `index.html` (head) |
@@ -175,16 +176,37 @@ sells — nobody buys a rigid box for the outside.
 Drop your files into `assets/img/boxes/` using these names. The `.1` files follow your own
 naming convention, so most of your photos only need the prefix added:
 
-| Closed shot | Open shot | Size | Which box |
-|---|---|---|---|
-| `box-1.jpg` | `box-1.1.jpg` | 800 × 600 | **AFC** — navy magnetic closure, collapsible |
-| `box-2.jpg` | `box-2.1.jpg` | 600 × 600 | **PBS North Carolina** — black drawer, silver foil |
-| `box-3.jpg` | `box-3.1.jpg` | 600 × 600 | **FOX** — sunflower two-piece lid & base |
-| `box-4.jpg` | `box-4.1.jpg` | 600 × 600 | your next rigid box |
-| `box-5.jpg` | `box-5.1.jpg` | 800 × 600 | your next rigid box |
-| `box-6.jpg` | `box-6.1.jpg` | 600 × 600 | your next rigid box |
-| `also-1.jpg` | — | 200 × 200 | Pelham pink corrugated mailer |
-| `also-2.jpg` | — | 200 × 200 | Medable white/blue corrugated mailer |
+| File | Export at | Aspect | Shown as | Which box |
+|---|---|---|---|---|
+| `box-1.jpg` | **1600 × 1200** | 4:3 landscape | wide tile | **AFC** — navy magnetic closure, collapsible |
+| `box-1.1.jpg` | **1600 × 1200** | 4:3 landscape | lightbox "open" | same box, open |
+| `box-2.jpg` | **1200 × 1200** | 1:1 square | square tile | **PBS North Carolina** — black drawer, silver foil |
+| `box-2.1.jpg` | **1600 × 1200** | 4:3 landscape | lightbox "open" | same box, drawer out |
+| `box-3.jpg` | **1200 × 1200** | 1:1 square | square tile | **FOX** — sunflower two-piece lid & base |
+| `box-3.1.jpg` | **1600 × 1200** | 4:3 landscape | lightbox "open" | same box, lid off |
+| `box-4.jpg` | **1200 × 1200** | 1:1 square | square tile | your next rigid box |
+| `box-4.1.jpg` | **1600 × 1200** | 4:3 landscape | lightbox "open" | same box, open |
+| `box-5.jpg` | **1600 × 1200** | 4:3 landscape | wide tile | your next rigid box |
+| `box-5.1.jpg` | **1600 × 1200** | 4:3 landscape | lightbox "open" | same box, open |
+| `box-6.jpg` | **1200 × 1200** | 1:1 square | square tile | your next rigid box |
+| `box-6.1.jpg` | **1600 × 1200** | 4:3 landscape | lightbox "open" | same box, open |
+| `also-1.jpg` | **200 × 200** | 1:1 square | 74px thumbnail | Pelham pink corrugated mailer |
+| `also-2.jpg` | **200 × 200** | 1:1 square | 74px thumbnail | Medable white/blue corrugated mailer |
+
+**All files: JPEG, sRGB colour profile, under 200KB each** (the `.1` open shots may go to 250KB —
+they are only fetched when someone opens the lightbox). Strip EXIF on export.
+
+The pixel sizes above are 2× what the page actually displays, which is deliberate: it keeps the
+photos sharp on retina phones and MacBooks, where most of your traffic will be, without paying
+for a 3000px file nobody sees.
+
+**Two rules that matter more than the pixel count:**
+
+1. **Crop to the stated aspect ratio before you upload.** The CSS crops to fill, so an uncropped
+   4:3 phone photo dropped into a square slot loses the top and bottom of the box — usually the
+   lid, which is the part you are selling.
+2. **Leave a little air around the box.** Roughly 8–10% margin on each side. A box cropped tight
+   to its own edges looks cramped, and the caption bar sits over the bottom of the tile.
 
 Captions for boxes 1–3 are already written from the actual photos. Boxes 4–6 are marked
 `REPLACE` in `index.html` — update the `data-caption` (shown in the lightbox) and the
@@ -203,27 +225,43 @@ photographed mid-slide and the AFC box shot open are the two strongest images in
 both show the box *doing something*. Aim for that — mid-open, mid-slide, lid lifting. A closed box
 on a table is a product photo; a box caught opening is a sales photo.
 
-Keep each file **under 200KB**. Export at 82% JPEG quality and run them through
-[squoosh.app](https://squoosh.app) if they come out heavier. Crop to the stated aspect ratio
-before uploading — the CSS crops to fill, so an uncropped phone photo may lose the box.
+Export at 82% JPEG quality and run anything still over the limit through
+[squoosh.app](https://squoosh.app) — free, in the browser, no upload to anyone.
 
 **If a photo is missing, that tile hides itself** rather than showing a broken image. If all six
 are missing, the whole section disappears. Safe to publish at any stage.
 
-### Videos — YouTube and Shorts, loaded only on click
+### YouTube Shorts — one line each, no HTML
 
-Four vertical slots sized for Shorts (9:16). For each one, in `index.html`:
+The Shorts strip sits at the bottom of the page, right before the final call to action, and is
+built from a list at the top of `assets/js/main.js`:
 
-1. Replace `data-video="REPLACE_ID_1"` with the **11-character YouTube video ID** — the part
-   after `/shorts/` or `?v=` in the URL. A Short at
-   `youtube.com/shorts/AbCdEfGhIjK` has the ID `AbCdEfGhIjK`.
-2. Drop a poster frame at `assets/img/video-01.jpg` (405 × 720), and update the `<figcaption>`.
+```js
+var SHORTS = [
+  'https://www.youtube.com/shorts/AbCdEfGhIjK | Magnetic closure unboxing',
+  'https://www.youtube.com/shorts/LmNoPqRsTuV | Gold foil on the press',
+  'https://www.youtube.com/shorts/WxYzAbCdEfG | Hand-wrapped corners',
+  'https://www.youtube.com/shorts/HiJkLmNoPqR | Drawer box, ribbon pull'
+];
+```
 
-Nothing loads from YouTube until a visitor clicks — the tile is just an image until then. That is
-deliberate: a normal YouTube embed pulls ~700KB of scripts per video and would wreck the load
+Open a Short from <https://www.youtube.com/@xpertspackaging/shorts>, copy the address bar, paste
+it between the quotes. Anything after the `|` becomes the caption under the tile; drop the `|`
+and the caption if you do not want one. A bare 11-character video ID works too.
+
+**There are no image files to prepare** — thumbnails are pulled from YouTube automatically at the
+right vertical crop. The strip lays out 1 to 6 tiles evenly; four to six looks best. On phones it
+becomes a swipeable row, one Short at a time, which is how people actually watch these.
+
+Nothing loads from YouTube until a visitor clicks — the tile is just a thumbnail until then. That
+is deliberate: a normal YouTube embed pulls ~700KB of scripts per video and would wreck the load
 speed this page currently has. Clicking swaps in the real player and fires a `video_play` event.
 
-**Until you set real IDs the whole video section stays hidden**, so it is safe to publish now.
+**Which Shorts to pick:** process over product. A box being wrapped, a corner being turned, foil
+hitting the press, a drawer sliding out. Static beauty shots are already covered by the gallery;
+the Shorts earn their place by proving there is a real factory behind the quote form.
+
+**With the list empty the whole section stays hidden**, so it is safe to publish now.
 
 ### Why there is no live Instagram feed
 
@@ -240,13 +278,23 @@ You asked about embedding Instagram. I'd advise against it *on this page* specif
 
 The video strip above does the same job with none of those costs: your content, curated, on your
 page, with the quote form still one tap away. The Instagram and YouTube links at the bottom of
-that section are there for people who genuinely want to go follow you — after they have seen the
-boxes. Update the two `REPLACE_HANDLE` placeholders with your real handles.
+that section is there for people who genuinely want to go follow you — after they have seen the
+boxes.
 
 ## 6. Reviews and the sister-brand Trustpilot
 
 The reviews block shows the **Xperts Packaging** Trustpilot rating, explicitly labelled as a
-sister company. Fill in `RATING` and `COUNT` in `index.html` from the live profile.
+sister company. Fill it in at the top of `assets/js/main.js`:
+
+```js
+var TRUSTPILOT = {
+  rating: '4.8',   // the TrustScore shown on the profile
+  count:  '126'    // the review count shown on the profile
+};
+```
+
+Both from <https://www.trustpilot.com/review/xpertspackaging.com>. The stars are drawn from the
+rating automatically, and the block stays hidden until both values are set.
 
 **Do not restyle this to look like Custom Boxes Experts' own reviews, and do not remove the
 "From our sister company" badge or the italic note.** Presenting another business's reviews as

@@ -146,6 +146,9 @@
         <div class="proof"><strong>12&ndash;15</strong><span>business days<br>standard turnaround</span></div>
         <div class="proof"><strong>1 hr</strong><span>quote response<br>in business hours</span></div>
       </div>
+
+      <p class="hero__sister">Part of the <strong>Xperts Packaging</strong> group &mdash; same owners,
+      same factory floor, same project managers, 10+ years of rigid box production behind us.</p>
     </div>
 
     <!-- Lead form -->
@@ -319,77 +322,6 @@
       you want a lighter option for e-commerce. Mention it when you request your quote and we&rsquo;ll
       price both.</p>
     </aside>
-  </div>
-</section>
-
-<!-- ════════════════════════════════════════════════════════════
-     VIDEO STRIP — YouTube / Shorts via click-to-load facades.
-     Nothing from YouTube loads until someone clicks, so the embeds
-     cost zero page weight and cannot hurt Core Web Vitals.
-     Swap data-video for your real 11-character YouTube IDs and drop
-     a poster image at the matching path.
-     ════════════════════════════════════════════════════════════ -->
-<section class="sec sec--cream" id="video">
-  <div class="wrap">
-    <header class="sechead">
-      <h2>Watch a rigid box come together</h2>
-      <p>Unboxing clips and factory footage from our own production floor &mdash; the wrap, the corners, the magnets closing.</p>
-    </header>
-
-    <div class="videos">
-
-      <figure class="vid vid--tall">
-        <button class="vfacade" type="button" data-video="REPLACE_ID_1" data-track="video-play"
-                aria-label="Play: magnetic closure box unboxing">
-          <img src="assets/img/video-01.jpg" alt="" width="405" height="720" loading="lazy" decoding="async">
-          <span class="vfacade__play" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>
-          </span>
-        </button>
-        <figcaption>Magnetic closure unboxing</figcaption>
-      </figure>
-
-      <figure class="vid vid--tall">
-        <button class="vfacade" type="button" data-video="REPLACE_ID_2" data-track="video-play"
-                aria-label="Play: foil stamping on the press">
-          <img src="assets/img/video-02.jpg" alt="" width="405" height="720" loading="lazy" decoding="async">
-          <span class="vfacade__play" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>
-          </span>
-        </button>
-        <figcaption>Gold foil on the press</figcaption>
-      </figure>
-
-      <figure class="vid vid--tall">
-        <button class="vfacade" type="button" data-video="REPLACE_ID_3" data-track="video-play"
-                aria-label="Play: hand-wrapping rigid box corners">
-          <img src="assets/img/video-03.jpg" alt="" width="405" height="720" loading="lazy" decoding="async">
-          <span class="vfacade__play" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>
-          </span>
-        </button>
-        <figcaption>Hand-wrapped corners</figcaption>
-      </figure>
-
-      <figure class="vid vid--tall">
-        <button class="vfacade" type="button" data-video="REPLACE_ID_4" data-track="video-play"
-                aria-label="Play: drawer box with ribbon pull">
-          <img src="assets/img/video-04.jpg" alt="" width="405" height="720" loading="lazy" decoding="async">
-          <span class="vfacade__play" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>
-          </span>
-        </button>
-        <figcaption>Drawer box, ribbon pull</figcaption>
-      </figure>
-
-    </div>
-
-    <p class="videos__social">
-      More on
-      <a href="https://www.instagram.com/REPLACE_HANDLE/" target="_blank" rel="noopener" data-track="social-instagram">Instagram</a>
-      and
-      <a href="https://www.youtube.com/@REPLACE_HANDLE" target="_blank" rel="noopener" data-track="social-youtube">YouTube</a>
-    </p>
   </div>
 </section>
 
@@ -664,14 +596,15 @@
          reviews were left for this company. Presenting another
          business's reviews as your own breaches Google Ads'
          misrepresentation policy and Trustpilot's terms.
-         Fill RATING and COUNT from the live profile.
+         Fill the rating and review count in TRUSTPILOT at the top of
+         assets/js/main.js — the block stays hidden until you do.
          ══════════════════════════════════════════════════════════ -->
     <aside class="tp">
       <p class="tp__flag">From our sister company</p>
       <div class="tp__in">
         <div class="tp__score">
           <span class="tp__num">RATING</span>
-          <span class="tp__stars" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+          <span class="tp__stars" aria-hidden="true"></span>
           <span class="tp__count">COUNT reviews on Trustpilot</span>
         </div>
         <div class="tp__body">
@@ -730,6 +663,33 @@
   </div>
 </section>
 
+<!-- ════════════════════════════════════════════════════════════
+     YOUTUBE SHORTS — click-to-load facades.
+     The tiles below are built by JS from the SHORTS list at the top
+     of assets/js/main.js. Paste your Shorts links there; thumbnails
+     come straight from YouTube so there is nothing to upload, and
+     nothing from youtube.com loads until a visitor actually clicks
+     (a cold YouTube iframe costs ~700KB and would wreck the LCP on
+     a paid landing page). With no links pasted the whole section
+     hides itself rather than showing empty boxes.
+     ════════════════════════════════════════════════════════════ -->
+<section class="sec sec--cream" id="video" hidden>
+  <div class="wrap">
+    <header class="sechead">
+      <h2>Watch a rigid box come together</h2>
+      <p>Shorts straight off our production floor &mdash; the wrap going on, the corners turned by hand,
+      the magnets closing. Filmed at Xperts Packaging, our sister factory, which is where your boxes are made.</p>
+    </header>
+
+    <div class="videos" id="shorts"></div>
+
+    <p class="videos__social">
+      More on
+      <a href="https://www.youtube.com/@xpertspackaging/shorts" target="_blank" rel="noopener" data-track="social-youtube">YouTube&nbsp;Shorts</a>
+    </p>
+  </div>
+</section>
+
 <!-- ── Final CTA ─────────────────────────────────────────────── -->
 <section class="final">
   <div class="wrap final__in">
@@ -757,7 +717,7 @@
         </svg>
         <span class="logo__txt"><strong>CUSTOM</strong><em>Boxes Experts</em></span>
       </a>
-      <p>Custom rigid and luxury setup box manufacturing for US and Canadian brands. Structural design, printing, finishing and delivery under one project manager.</p>
+      <p>Custom rigid and luxury setup box manufacturing for US and Canadian brands. Structural design, printing, finishing and delivery under one project manager. A sister company of <a href="https://www.xpertspackaging.com/" target="_blank" rel="noopener">Xperts Packaging</a>.</p>
     </div>
     <div class="foot__col">
       <h3>Contact</h3>

@@ -150,6 +150,14 @@ ul,ol{margin:0;padding:0;list-style:none}
 .proof strong{display:block;font-family:var(--font-head);font-size:1.5rem;font-weight:700;color:var(--navy);line-height:1.1}
 .proof span{font-size:.8rem;color:var(--muted);line-height:1.35;display:block;margin-top:4px}
 
+/* Group line — states the Xperts Packaging relationship up front, where
+   a buyer weighing an unfamiliar supplier is actually looking. */
+.hero__sister{
+  margin-top:18px;padding-top:16px;border-top:1px solid rgba(26,49,99,.12);
+  font-size:.9rem;line-height:1.5;color:var(--muted);
+}
+.hero__sister strong{color:var(--navy)}
+
 /* ── Lead form ─────────────────────────────────────────────── */
 .formcard{
   background:#fff;border-radius:14px;box-shadow:var(--shadow-lg);
@@ -385,8 +393,11 @@ body.modal-open{overflow:hidden}
 .shot img[data-missing]{opacity:.35}
 
 /* ── Video strip ───────────────────────────────────────────── */
-.videos{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
-.vid{margin:0}
+/* Flex, not a fixed 4-column grid: the strip is built from however many
+   Shorts are pasted into SHORTS, so 1, 3 or 5 tiles centre cleanly
+   instead of leaving a hole. max-width caps the 9:16 tile height. */
+.videos{display:flex;flex-wrap:wrap;justify-content:center;gap:18px}
+.vid{flex:0 1 240px;max-width:260px;min-width:180px}
 .vfacade{
   display:block;width:100%;padding:0;border:0;cursor:pointer;position:relative;
   border-radius:var(--radius);overflow:hidden;background:var(--navy);
@@ -562,7 +573,7 @@ body.modal-open{overflow:hidden}
   .steps{grid-template-columns:repeat(2,1fr)}
   .gallery{grid-template-columns:repeat(2,1fr)}
   .shot--wide{grid-column:span 2}
-  .videos{grid-template-columns:repeat(2,1fr)}
+  .vid{flex:0 1 46%;max-width:280px}
   .tp__in{grid-template-columns:1fr;gap:20px}
   .tp__score{border-right:0;border-bottom:1px solid var(--line);padding:0 0 18px}
   .foot__in{grid-template-columns:repeat(2,1fr)}
@@ -592,10 +603,11 @@ body.modal-open{overflow:hidden}
   .shot figcaption span{display:none}
   /* One short at a time, swiped horizontally — how people watch these */
   .videos{
-    display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;
+    display:flex;flex-wrap:nowrap;justify-content:flex-start;gap:12px;
+    overflow-x:auto;scroll-snap-type:x mandatory;
     margin:0 -20px;padding:0 20px 8px;-webkit-overflow-scrolling:touch;
   }
-  .vid{flex:0 0 62%;scroll-snap-align:center}
+  .vid{flex:0 0 62%;min-width:0;max-width:none;scroll-snap-align:center}
   .tp{padding:22px 18px}
   .lb__nav{width:42px;height:42px}
   .lb__nav--prev{left:6px}
