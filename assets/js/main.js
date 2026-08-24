@@ -238,14 +238,35 @@
   var shots   = $$('#gallery .shot img');
   var lbIndex = 0;
 
+  var lbToggle = $('#lb-toggle');
+  var lbToggleTxt = $('#lb-toggle-txt');
+  var lbClosedSrc = '', lbOpenSrc = '', lbIsOpen = false;
+
   var lbShow = function (i) {
     if (!shots.length) return;
     lbIndex = (i + shots.length) % shots.length;
     var img = shots[lbIndex];
-    lbImg.src = img.currentSrc || img.src;
+    lbClosedSrc = img.currentSrc || img.src;
+    lbOpenSrc   = img.getAttribute('data-open') || '';
+    lbIsOpen    = false;
+    lbImg.src = lbClosedSrc;
     lbImg.alt = img.alt || '';
     lbCap.textContent = img.getAttribute('data-caption') || img.alt || '';
+    /* Only offer the toggle when a second shot actually exists */
+    if (lbToggle) {
+      lbToggle.hidden = !lbOpenSrc;
+      if (lbToggleTxt) lbToggleTxt.textContent = 'See it open';
+    }
   };
+
+  if (lbToggle) {
+    lbToggle.addEventListener('click', function () {
+      lbIsOpen = !lbIsOpen;
+      lbImg.src = lbIsOpen ? lbOpenSrc : lbClosedSrc;
+      if (lbToggleTxt) lbToggleTxt.textContent = lbIsOpen ? 'See it closed' : 'See it open';
+      if (lbIsOpen) track('gallery_view_inside', { index: lbIndex });
+    });
+  }
 
   if (lb && shots.length) {
     shots.forEach(function (img, i) {
@@ -255,6 +276,9 @@
         else lb.setAttribute('open', '');
         document.body.classList.add('modal-open');
         track('gallery_open', { index: i, box: img.getAttribute('data-caption') || '' });
+        /* Warm the open shot so the toggle is instant, not a spinner */
+        var openSrc = img.getAttribute('data-open');
+        if (openSrc) { var pre = new Image(); pre.src = openSrc; }
       });
     });
 

@@ -168,36 +168,47 @@ Add these to `.htaccess` for speed (Core Web Vitals feed into landing page exper
 
 ### Photos — drop-in replacement, no code
 
-The gallery ships with branded placeholders that say "Replace with your photo". Overwrite the
-files in `assets/img/` keeping the **exact filenames and dimensions** and everything else works:
+The gallery holds **six rigid boxes, each with two shots**: a closed hero shot in the grid, and an
+open shot revealed by a "See it open" button in the lightbox. That second shot is the one that
+sells — nobody buys a rigid box for the outside.
 
-| File | Size | Suggested subject |
-|---|---|---|
-| `gallery-01.jpg` | 800 × 600 | Magnetic closure — soft-touch black, gold foil |
-| `gallery-02.jpg` | 600 × 600 | Drawer box — linen wrap, ribbon pull |
-| `gallery-03.jpg` | 600 × 600 | Shoulder neck — fragrance |
-| `gallery-04.jpg` | 600 × 600 | Book style — opened, showing the set |
-| `gallery-05.jpg` | 800 × 600 | Two-piece lid & base — kraft, white ink |
-| `gallery-06.jpg` | 600 × 600 | Collapsible — flat and assembled together |
-| `gallery-07.jpg` | 800 × 600 | Jewelry — velvet lined |
-| `gallery-08.jpg` | 800 × 600 | Rigid mailer — foam insert holding a product |
+Drop your files into `assets/img/boxes/` using these names. The `.1` files follow your own
+naming convention, so most of your photos only need the prefix added:
 
-Then update the `alt` text, the `data-caption` (shown in the lightbox) and the `<figcaption>` in
-`index.html` to describe the actual box. **Write real specs in the caption** — "2mm greyboard,
-soft-touch, gold foil, EVA insert" is what makes a buyer point at it and say "like that one."
-Generic captions waste the section.
+| Closed shot | Open shot | Size | Which box |
+|---|---|---|---|
+| `box-1.jpg` | `box-1.1.jpg` | 800 × 600 | **AFC** — navy magnetic closure, collapsible |
+| `box-2.jpg` | `box-2.1.jpg` | 600 × 600 | **PBS North Carolina** — black drawer, silver foil |
+| `box-3.jpg` | `box-3.1.jpg` | 600 × 600 | **FOX** — sunflower two-piece lid & base |
+| `box-4.jpg` | `box-4.1.jpg` | 600 × 600 | your next rigid box |
+| `box-5.jpg` | `box-5.1.jpg` | 800 × 600 | your next rigid box |
+| `box-6.jpg` | `box-6.1.jpg` | 600 × 600 | your next rigid box |
+| `also-1.jpg` | — | 200 × 200 | Pelham pink corrugated mailer |
+| `also-2.jpg` | — | 200 × 200 | Medable white/blue corrugated mailer |
 
-Shooting notes that matter more than camera quality: one box per frame, plain light background,
-shot at a slight angle so two faces and the lid are visible, and at least three photographed
-*open* with product inside. Buyers are judging whether it looks expensive — angle and lighting
-do that, not resolution.
+Captions for boxes 1–3 are already written from the actual photos. Boxes 4–6 are marked
+`REPLACE` in `index.html` — update the `data-caption` (shown in the lightbox) and the
+`<figcaption>` when you add them.
 
-Keep each file **under 200KB**. Export at 82% JPEG quality; run them through
-[squoosh.app](https://squoosh.app) if they come out heavier. Images are the one thing that can
-undo the page's load speed.
+**Why the mailers are in a separate labelled block.** Two of the six boxes you sent — Pelham and
+Medable — are corrugated mailers, not rigid boxes. Someone who clicked an ad for "custom rigid
+boxes" and lands on a page showing pink corrugated mailers gets a message-match mismatch, which
+costs you both trust and ad relevance. They now sit in a small "We also print corrugated mailers"
+note below the gallery, which is honest, keeps the rigid message clean, and still catches the
+buyer who needs both. If you would rather not show them at all, delete the `<aside class="also">`
+block.
 
-**If you delete the placeholders and add nothing, the section hides itself** rather than showing
-broken images. Same for individual photos.
+Shooting notes for boxes 4–6, based on what works in the three you already have: the PBS drawer
+photographed mid-slide and the AFC box shot open are the two strongest images in the set, because
+both show the box *doing something*. Aim for that — mid-open, mid-slide, lid lifting. A closed box
+on a table is a product photo; a box caught opening is a sales photo.
+
+Keep each file **under 200KB**. Export at 82% JPEG quality and run them through
+[squoosh.app](https://squoosh.app) if they come out heavier. Crop to the stated aspect ratio
+before uploading — the CSS crops to fill, so an uncropped phone photo may lose the box.
+
+**If a photo is missing, that tile hides itself** rather than showing a broken image. If all six
+are missing, the whole section disappears. Safe to publish at any stage.
 
 ### Videos — YouTube and Shorts, loaded only on click
 
