@@ -327,6 +327,40 @@
     });
   }
 
+  /* ---- Never show unfinished content to a visitor ----------
+     Tiles, testimonials and the Trustpilot figures all ship with
+     placeholder text. Rather than risk that text going live, anything
+     still holding a placeholder removes itself, and a section whose
+     content is entirely placeholder disappears with it. */
+  var isPlaceholder = function (el) {
+    if (!el) return false;
+    var t = (el.textContent || '') + (el.getAttribute && el.getAttribute('data-caption') || '');
+    return /REPLACE|\bRATING\b|\bCOUNT\b/.test(t);
+  };
+
+  /* Gallery tiles that have not been described yet */
+  $$('#gallery .shot').forEach(function (fig) {
+    var img = fig.querySelector('img');
+    var txt = (fig.textContent || '') + ' ' + (img && img.getAttribute('data-caption') || '');
+    if (/REPLACE/.test(txt)) fig.hidden = true;
+  });
+
+  /* Testimonials still carrying placeholder copy */
+  $$('.quote').forEach(function (fig) {
+    if (isPlaceholder(fig.querySelector('blockquote'))) fig.hidden = true;
+  });
+  var quotesWrap = $('.quotes');
+  if (quotesWrap && !$$('.quote:not([hidden])', quotesWrap).length) quotesWrap.hidden = true;
+
+  /* Trustpilot block before the real rating is filled in */
+  var tp = $('.tp');
+  if (tp && isPlaceholder(tp.querySelector('.tp__score'))) tp.hidden = true;
+
+  var reviewsSec = document.getElementById('reviews');
+  if (reviewsSec && (!quotesWrap || quotesWrap.hidden) && (!tp || tp.hidden)) {
+    reviewsSec.hidden = true;
+  }
+
   /* ================= Video facades ========================= */
   /* Nothing is requested from YouTube until someone clicks, so the
      embeds cost no page weight and cannot affect Core Web Vitals. */
