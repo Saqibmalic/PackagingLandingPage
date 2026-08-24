@@ -67,6 +67,8 @@ Nothing else hardcodes a colour.
 | 9 | Set the recipient email — `NOTIFY_EMAIL` (Sheets) or `$TO`/`$FROM` (PHP) | `google-apps-script.gs` / `submit-lead.php` |
 | 10 | Update `<link rel="canonical">` and the OG URLs to the real URL | `index.html` (head), and the `TravelAgency` block in the JSON-LD |
 | 11 | Date the two legal pages, add your ICO registration if you have one | `privacy-policy.html`, `terms.html` |
+| 12 | Add your four customer videos + poster frames (section 3 below) | `index.html` → `#reviews`, `assets/img/` |
+| 13 | Fill in the Ramadan dates and three `£REPLACE` prices, and check the year | `index.html` → `#ramadan` |
 
 **Do not skip #4.** Google Ads prohibits fabricated testimonials, and a disapproval on a lead-gen
 travel account is hard to reverse. If you don't have quotes yet, delete the whole `#reviews`
@@ -103,6 +105,74 @@ one interaction rather than two. Below 1000px the form is far down the page, so 
 
 Without JavaScript the hero form posts normally to `submit-lead.php` and redirects to the thank-you
 page. Nothing is lost (this only works on PHP hosting — see below).
+
+
+---
+
+## 2b. Customer video testimonials
+
+Four vertical (9:16) slots, sized for phone-shot footage. **Nothing loads until someone clicks** —
+each tile is just a poster image, because a normal YouTube embed pulls roughly 700KB of scripts per
+video and would undo the load speed this page depends on.
+
+For each of the four tiles in `index.html` → `#reviews`:
+
+1. Set `data-video`:
+   - **YouTube:** the 11-character video ID (`youtube.com/shorts/AbCdEfGhIjK` → `AbCdEfGhIjK`),
+     with `data-video-type="youtube"`. Plays via youtube-nocookie.
+   - **Self-hosted MP4:** a path such as `assets/video/story-1.mp4`, with `data-video-type="file"`.
+     Keep each file under ~15MB and encode H.264/AAC, 720×1280.
+2. Drop a poster frame at `assets/img/video-01.jpg` … `video-04.jpg`, **405 × 720**, under 150KB.
+   Pick a frame where the person's face is visible and they are mid-sentence — a frozen smile reads
+   as stock footage.
+3. Rewrite the `<figcaption>`: name, package, month. `Aisha, 5 star 10 nights, March` beats
+   "Happy customer".
+
+**Safe to publish before the videos are ready:** while all four are still `REPLACE_VIDEO_n` the
+whole section stays hidden, and any single tile whose poster image fails to load hides itself.
+
+Two things worth knowing:
+
+- **Get permission in writing**, even informally over WhatsApp. A testimonial video of an identifiable
+  person is personal data under UK GDPR, and Google Ads will ask you to substantiate testimonials if
+  a reviewer flags the page.
+- **Subtitle them.** Most people watch these muted, in public, on mobile. Burned-in captions roughly
+  double completion on this kind of tile. YouTube's auto-captions are not enough if the speaker has
+  an accent — burn them in when you edit.
+
+## 2c. Ramadan section
+
+`#ramadan` is a dedicated dark block between packages and hotels, with its own three cards (first ten
+nights / last ten nights / full month) and its own CTAs. It exists because "ramadan umrah packages"
+is the highest-intent and highest-value term in this vertical, and because Ramadan buyers convert on
+scarcity rather than price — the copy leans on allocation, not discount.
+
+Fill in the two date ranges and the three prices, and **check the year in the heading** before each
+season. Run it as its own ad group pointed at `…/#ramadan` so the ad, the landing anchor and the
+copy all match.
+
+## 2d. Where the lead-capture points are
+
+Nine entry points, all feeding the same two-stage flow and the same conversion:
+
+| # | Where | What it is |
+|---|---|---|
+| 1 | Hero | Full 4-field form, above the fold on desktop and second screen on mobile |
+| 2–5 | Package cards | "Get exact price" — preselects the tier the buyer clicked |
+| 6 | Ramadan cards | "Register interest" — tagged with which Ramadan window |
+| 7 | Hotel tier cards | "See availability for my dates" |
+| 8–9 | Two inline bands | 3-field mini form (name, mobile, standard) after hotels and before the FAQ |
+| + | Sticky mobile bar | Call · WhatsApp · Get my quote, always visible |
+| + | Closing CTA | Button + phone |
+| + | Header & footer | Phone, WhatsApp, email |
+
+The mini bands post the same stage-1 payload and fire the same conversion, then open the modal
+straight onto the trip questions. **Every button on the page carries the context of where it was
+clicked** into your sheet (`Package Interest`), so you can see which section actually produces
+enquiries and cut the ones that don't.
+
+On desktop, package buttons scroll to the hero form rather than opening a modal — one interaction
+instead of two, and the form is already on screen. On mobile they open the modal.
 
 ---
 
@@ -248,6 +318,12 @@ those values land in your sheet. Also check:
 
 ## 6. Why the page is built this way
 
+- **Text is trimmed to the scannable minimum, not removed.** Long paragraphs kill conversion, but
+  thin pages score badly on landing page experience and get the "low value content" treatment in ad
+  review — travel lead-gen is a policy-sensitive vertical. The compromise here: short lines,
+  front-loaded, in scannable blocks; the FAQ carries the depth Google's raters look for behind
+  accordions, where a human only reads what they care about. Word count is roughly a third lower
+  than a typical Umrah landing page while covering more questions.
 - **Form above the fold, four fields.** Every extra field costs completions. Qualifying questions
   (budget, airport, dates) come after the lead is already banked.
 - **No exit paths.** The nav is anchor links only. The only outbound links are the legal pages and

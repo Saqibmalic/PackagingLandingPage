@@ -368,6 +368,22 @@
     }));
   }
 
+  /* Inline lead bands — same stage 1, same conversion, then the
+     modal opens straight onto the trip questions. */
+  $$('.band__form').forEach(function (form) {
+    wireForm(form);
+    form.addEventListener('submit', stageOne(form, function (data) {
+      if (modalForm) {
+        ['name', 'email', 'phone'].forEach(function (k) {
+          var el = modalForm.querySelector('[name="' + k + '"]');
+          if (el && data[k]) el.value = data[k];
+        });
+      }
+      openModal('lead-band', data.tier || '');
+      showStep(2);
+    }));
+  });
+
   if (modalForm) {
     wireForm(modalForm);
     modalForm.addEventListener('submit', stageOne(modalForm, function () { showStep(2); }));
@@ -398,6 +414,63 @@
       showStep(3);
     });
   });
+
+
+  /* ================= Customer video wall =======================
+     Each tile is a poster image until clicked. Only then does the
+     real player load — a normal YouTube embed costs ~700KB per
+     video and would wreck the load speed this page depends on. */
+  (function videos() {
+    var section = document.getElementById('reviews');
+    if (!section) return;
+
+    var live = 0;
+    $$('.vid', section).forEach(function (fig) {
+      var btn = $('.vid__btn', fig);
+      var id  = btn && btn.getAttribute('data-video');
+
+      /* Not configured yet → hide this tile rather than ship a
+         broken play button. */
+      if (!id || id.indexOf('REPLACE') === 0) { fig.hidden = true; return; }
+
+      var poster = $('.vid__poster', fig);
+      if (poster) {
+        poster.addEventListener('error', function () { fig.hidden = true; });
+      }
+      live++;
+
+      btn.addEventListener('click', function () {
+        var type = btn.getAttribute('data-video-type') || 'youtube';
+        var title = btn.getAttribute('data-video-title') || 'Customer story';
+        var player;
+
+        if (type === 'file') {
+          player = document.createElement('video');
+          player.src = id;
+          player.controls = true;
+          player.autoplay = true;
+          player.playsInline = true;
+          player.setAttribute('title', title);
+          if (poster) player.poster = poster.getAttribute('src');
+        } else {
+          player = document.createElement('iframe');
+          player.src = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(id) +
+                       '?autoplay=1&rel=0&modestbranding=1&playsinline=1';
+          player.allow = 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture';
+          player.allowFullscreen = true;
+          player.setAttribute('title', title);
+          player.setAttribute('loading', 'lazy');
+        }
+
+        btn.replaceWith(player);
+        track('video_play', { video: id, position: title });
+      });
+    });
+
+    /* All four still placeholders → keep the section hidden so the
+       page is publishable before the videos are ready. */
+    section.hidden = live === 0;
+  })();
 
   /* ---- Scroll depth, so you can see where attention dies ------ */
   (function depth() {

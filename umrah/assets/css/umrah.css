@@ -132,8 +132,11 @@ table{border-collapse:collapse;width:100%}
   content:"";position:absolute;inset:0;opacity:.10;pointer-events:none;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg fill='none' stroke='%23C8A24A' stroke-width='1'%3E%3Cpath d='M30 2l7 7h11v11l7 7-7 7v11H37l-7 7-7-7H12V34l-7-7 7-7V9h11z'/%3E%3Cpath d='M30 12l18 18-18 18-18-18z'/%3E%3C/g%3E%3C/svg%3E");
 }
-.hero__in{position:relative;display:grid;grid-template-columns:1.02fr .98fr;gap:52px;align-items:start;
-  padding:56px 0 62px}
+.hero__in{position:relative;display:grid;grid-template-columns:1.02fr .98fr;gap:22px 52px;align-items:start;
+  grid-template-areas:"copy form" "proof form";padding:56px 0 62px}
+.hero__copy{grid-area:copy}
+.hero__proof{grid-area:proof}
+.quote{grid-area:form}
 .hero h1{color:#fff;margin-bottom:16px}
 .hero h1 .hl{color:var(--gold)}
 .hero__sub{font-size:1.1rem;color:rgba(255,255,255,.88);max-width:34em;margin-bottom:24px}
@@ -273,6 +276,72 @@ table{border-collapse:collapse;width:100%}
 .rev cite{font-style:normal;font-size:.85rem;color:var(--muted)}
 .rev cite b{display:block;color:var(--ink);font-size:.92rem}
 
+
+/* ── Inline lead bands ─────────────────────────────────────────
+   Repeated capture points between sections. Three fields is the
+   most that fits on one line and the most anyone fills in from a
+   mid-page prompt — the rest is asked after the lead is banked. */
+.band{background:var(--green-dk);color:#fff;padding:34px 0;position:relative;overflow:hidden}
+.band::before{
+  content:"";position:absolute;inset:0;opacity:.08;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg fill='none' stroke='%23C8A24A' stroke-width='1'%3E%3Cpath d='M30 12l18 18-18 18-18-18z'/%3E%3C/g%3E%3C/svg%3E");
+}
+.band__in{position:relative;display:grid;grid-template-columns:minmax(220px,.85fr) 1.15fr;gap:26px;align-items:center}
+.band__copy h2{color:#fff;font-size:clamp(1.35rem,2.2vw,1.75rem);margin-bottom:4px}
+.band__copy p{margin:0;font-size:.92rem;color:rgba(255,255,255,.8)}
+.band__form{display:grid;grid-template-columns:1fr 1fr 1.2fr auto;gap:10px;align-items:start}
+.band__form .field{margin:0}
+.band__form input,.band__form select{padding:13px 13px;border-color:transparent}
+.band__form [data-err]{color:#FFD9D4}
+.band__form .btn{padding:13px 22px;white-space:nowrap}
+
+/* ── Ramadan ───────────────────────────────────────────────────
+   Deliberately the highest-contrast block on the page: it is the
+   highest-intent, most seasonal money term in the account. */
+.ram{background:linear-gradient(168deg,#0B4433 0%,#062A20 100%);color:#fff;padding:72px 0;position:relative;overflow:hidden}
+.ram::before{
+  content:"";position:absolute;inset:0;opacity:.09;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='none' stroke='%23C8A24A' stroke-width='1'%3E%3Ccircle cx='40' cy='40' r='26'/%3E%3Cpath d='M40 14l7.5 7.5H58v10.5L65.5 40 58 47.5V58H47.5L40 65.5 32.5 58H22V47.5L14.5 40 22 32.5V22h10.5z'/%3E%3C/g%3E%3C/svg%3E");
+}
+.ram > .wrap{position:relative}
+.ram__head{max-width:720px;margin-bottom:34px}
+.ram h2,.ram h3{color:#fff}
+.sec__kicker--light{color:var(--gold)}
+.ram__lede{font-size:1.05rem;color:rgba(255,255,255,.85);margin:0}
+.ram__grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.ram__card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);border-radius:var(--radius);
+  padding:24px 22px;display:flex;flex-direction:column;position:relative;backdrop-filter:blur(2px)}
+.ram__card--flag{border-color:var(--gold);background:rgba(200,162,74,.12)}
+.ram__card h3{font-size:1.35rem;margin-bottom:4px}
+.ram__when{font-size:.85rem;color:var(--gold);margin:0 0 14px;min-height:2.6em}
+.ram__card .pkg__price b{color:#fff}
+.ram__card .pkg__price span{color:rgba(255,255,255,.65)}
+.ram__card .pkg__list{margin-top:14px}
+.ram__card .pkg__list li{color:rgba(255,255,255,.9)}
+.ram__note{font-size:.85rem;color:rgba(255,255,255,.62);margin:24px 0 0;max-width:70ch}
+
+/* ── Customer video wall ───────────────────────────────────────
+   Facade pattern: each tile is just a poster image until it is
+   clicked. A real YouTube embed pulls ~700KB per video and would
+   undo the load speed this page depends on. */
+.vids{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.vid{margin:0}
+.vid__btn{
+  display:block;width:100%;aspect-ratio:9/16;padding:0;border:0;cursor:pointer;position:relative;
+  border-radius:var(--radius);overflow:hidden;background:var(--green-dk);
+}
+.vid__poster{width:100%;height:100%;object-fit:cover;display:block}
+.vid__btn::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 45%,rgba(0,0,0,.55) 100%)}
+.vid__play{
+  position:absolute;left:50%;top:50%;width:62px;height:62px;margin:-31px 0 0 -31px;border-radius:50%;
+  background:rgba(255,255,255,.94);z-index:2;transition:transform .15s ease,background .15s ease;
+}
+.vid__play::before{content:"";position:absolute;left:24px;top:19px;border-left:20px solid var(--green-dk);
+  border-top:12px solid transparent;border-bottom:12px solid transparent}
+.vid__btn:hover .vid__play{transform:scale(1.08);background:var(--gold)}
+.vid figcaption{font-size:.85rem;color:var(--muted);margin-top:10px}
+.vid iframe,.vid video{width:100%;aspect-ratio:9/16;border:0;border-radius:var(--radius);display:block;background:#000}
+
 /* ── FAQ ───────────────────────────────────────────────────────── */
 .faq{max-width:840px;margin:0 auto}
 .faq details{border-bottom:1px solid var(--line);padding:2px 0}
@@ -338,7 +407,14 @@ table{border-collapse:collapse;width:100%}
 
 /* ── Responsive ────────────────────────────────────────────────── */
 @media (max-width:1000px){
-  .hero__in{grid-template-columns:1fr;gap:32px;padding:44px 0 48px}
+  .band__in{grid-template-columns:1fr;gap:18px}
+  .band__form{grid-template-columns:1fr 1fr}
+  .band__form .btn{grid-column:1/-1}
+  .ram__grid{grid-template-columns:1fr}
+  .vids{grid-template-columns:1fr 1fr}
+  /* Headline → form → proof points: the enquiry form sits in the first
+     screen and a bit, not below every benefit bullet. */
+  .hero__in{grid-template-columns:1fr;grid-template-areas:"copy" "form" "proof";gap:26px;padding:40px 0 46px}
   .quote{position:static}
   .strip__in{grid-template-columns:1fr 1fr}
   .steps{grid-template-columns:1fr 1fr}
@@ -347,6 +423,14 @@ table{border-collapse:collapse;width:100%}
   .foot__in{grid-template-columns:1fr 1fr}
 }
 @media (max-width:760px){
+  /* WhatsApp already lives in the sticky bar — the pill here only
+     crowds the scrolling nav. */
+  .head__wa{display:none}
+  .head__tel{min-height:44px}
+  .head__nav a{padding:14px 0}
+  .band{padding:26px 0}
+  .band__form{grid-template-columns:1fr}
+  .ram{padding:52px 0}
   body{font-size:16px}
   .sec{padding:52px 0}
   .head__claim,.head__tel .lbl{display:none}
