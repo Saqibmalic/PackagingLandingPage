@@ -393,9 +393,6 @@ body.modal-open{overflow:hidden}
 .shot img[data-missing]{opacity:.35}
 
 /* ── Video strip ───────────────────────────────────────────── */
-/* Flex, not a fixed 4-column grid: the strip is built from however many
-   Shorts are pasted into SHORTS, so 1, 3 or 5 tiles centre cleanly
-   instead of leaving a hole. max-width caps the 9:16 tile height. */
 .videos{display:flex;flex-wrap:wrap;justify-content:center;gap:18px}
 .vid{margin:0;flex:0 1 240px;max-width:260px;min-width:180px}
 .vfacade{
@@ -417,6 +414,66 @@ body.modal-open{overflow:hidden}
 .vid iframe{width:100%;aspect-ratio:9/16;border:0;border-radius:var(--radius);display:block}
 .vid--wide iframe{aspect-ratio:16/9}
 .vid figcaption{margin-top:10px;font-size:.9rem;color:var(--muted);text-align:center}
+/* ================= Film wall ==============================
+   Vertical clips, sized so three sit comfortably on a laptop without
+   the row turning into a wall of phone-shaped rectangles. The tile is
+   the hero; the caption and CTA sit under it so the eye lands on
+   motion first and the ask second. */
+.films{display:flex;flex-wrap:wrap;justify-content:center;gap:26px}
+.film{margin:0;flex:0 1 340px;max-width:360px;min-width:230px;display:flex;flex-direction:column}
+.film__frame{
+  position:relative;border-radius:var(--radius);overflow:hidden;
+  background:var(--navy);aspect-ratio:9/16;
+  box-shadow:0 14px 34px rgba(26,49,99,.16);
+}
+.film__vid{
+  display:block;width:100%;height:100%;object-fit:cover;
+  background:var(--navy);
+}
+/* The control stays quiet until the tile is hovered or focused — the
+   point of a silent loop is that it does not look like a video player. */
+.film__toggle{
+  position:absolute;right:10px;bottom:10px;width:38px;height:38px;
+  display:grid;place-items:center;padding:0;cursor:pointer;
+  border:0;border-radius:50%;color:var(--navy);
+  background:rgba(255,255,255,.9);backdrop-filter:blur(4px);
+  opacity:0;transition:opacity .18s ease;
+}
+.film__frame:hover .film__toggle,
+.film__toggle:focus-visible{opacity:1}
+.film__ic{width:17px;height:17px}
+.film__toggle .film__ic--play{display:none}
+.film__toggle[data-paused="1"]{opacity:1}
+.film__toggle[data-paused="1"] .film__ic--play{display:block}
+.film__toggle[data-paused="1"] .film__ic--pause{display:none}
+
+.film figcaption{margin-top:14px;text-align:center}
+.film figcaption strong{
+  display:block;font-family:var(--font-head);font-size:1.02rem;
+  font-weight:600;color:var(--navy);
+}
+.film figcaption span{display:block;font-size:.85rem;color:var(--muted);margin-top:3px}
+.film__cta{
+  margin-top:12px;display:block;text-align:center;
+  padding:11px 16px;border-radius:var(--radius-sm);
+  font-family:var(--font-head);font-weight:600;font-size:.92rem;
+  color:var(--navy);background:#fff;border:1.5px solid rgba(26,49,99,.18);
+  transition:background .16s ease,border-color .16s ease,transform .16s ease;
+}
+.film__cta:hover{background:var(--amber);border-color:var(--amber-dk);transform:translateY(-1px)}
+.films__note{margin:30px 0 0;text-align:center;font-size:.85rem;color:var(--muted)}
+
+/* Folding-carton clips in the "we also print" note reuse the tile
+   styling at thumbnail scale. */
+.also__thumbs .film__vid{
+  width:74px;height:104px;object-fit:cover;border-radius:var(--radius-sm);
+  border:1px solid var(--line);background:var(--navy);
+}
+
+@media (prefers-reduced-motion:reduce){
+  .film__cta:hover{transform:none}
+}
+
 .videos__social{margin:32px 0 0;text-align:center;font-size:.95rem;color:var(--muted)}
 .videos__social a{font-weight:700;color:var(--navy)}
 
@@ -450,7 +507,7 @@ body.modal-open{overflow:hidden}
   max-width:760px;margin:42px auto 0;padding:18px 22px;
   background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
 }
-.also__thumbs{display:flex;gap:10px;flex:none}
+.also__thumbs{display:flex;gap:10px;flex:none;flex-wrap:wrap}
 .also__thumbs img{
   width:74px;height:74px;object-fit:cover;border-radius:var(--radius-sm);
   border:1px solid var(--line);background:var(--mint);
@@ -573,7 +630,7 @@ body.modal-open{overflow:hidden}
   .steps{grid-template-columns:repeat(2,1fr)}
   .gallery{grid-template-columns:repeat(2,1fr)}
   .shot--wide{grid-column:span 2}
-  .vid{flex:0 1 46%;max-width:280px}
+  .film{flex:0 1 46%;max-width:300px}
   .tp__in{grid-template-columns:1fr;gap:20px}
   .tp__score{border-right:0;border-bottom:1px solid var(--line);padding:0 0 18px}
   .foot__in{grid-template-columns:repeat(2,1fr)}
@@ -602,12 +659,15 @@ body.modal-open{overflow:hidden}
   .shot figcaption strong{font-size:.84rem}
   .shot figcaption span{display:none}
   /* One short at a time, swiped horizontally — how people watch these */
-  .videos{
-    display:flex;flex-wrap:nowrap;justify-content:flex-start;gap:12px;
+  /* One clip at a time, swiped horizontally — how people watch these */
+  .films{
+    flex-wrap:nowrap;justify-content:flex-start;gap:14px;
     overflow-x:auto;scroll-snap-type:x mandatory;
     margin:0 -20px;padding:0 20px 8px;-webkit-overflow-scrolling:touch;
   }
-  .vid{flex:0 0 62%;min-width:0;max-width:none;scroll-snap-align:center}
+  .film{flex:0 0 74%;min-width:0;max-width:none;scroll-snap-align:center}
+  .film__toggle{opacity:1}
+  .also__thumbs .film__vid{width:62px;height:88px}
   .tp{padding:22px 18px}
   .lb__nav{width:42px;height:42px}
   .lb__nav--prev{left:6px}

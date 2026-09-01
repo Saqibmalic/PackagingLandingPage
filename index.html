@@ -230,6 +230,77 @@
 </section>
 
 <!-- ════════════════════════════════════════════════════════════
+     FILM WALL — self-hosted, silent, looping.
+     Clips are cut from real production footage and stripped of audio,
+     so they behave like moving photographs: no controls to hunt for,
+     nothing that shouts at someone browsing with the sound on.
+
+     Nothing downloads until a tile scrolls into view — the <video>
+     carries no src until the observer in main.js assigns one — so the
+     LCP and the initial payload are untouched. Off-screen tiles pause
+     themselves, which matters on a phone on cellular data.
+
+     Self-hosted rather than embedded on purpose: a YouTube embed would
+     cost ~700KB per tile, brand every frame with someone else's logo,
+     and put a "watch on YouTube" exit door on a page you are paying
+     $8-25 a click to fill.
+     ════════════════════════════════════════════════════════════ -->
+<section class="sec sec--cream" id="film">
+  <div class="wrap">
+    <header class="sechead">
+      <h2>This is what lands on your customer&rsquo;s doorstep</h2>
+      <p>Rigid boxes we produced, filmed as they actually open &mdash; not renders. Both of these
+      started as a phone call about specs, exactly like the one you&rsquo;re about to have.</p>
+    </header>
+
+    <div class="films">
+
+      <figure class="film">
+        <div class="film__frame">
+          <video class="film__vid" data-src="assets/video/rigid-book.mp4"
+                 poster="assets/video/rigid-book.jpg"
+                 width="540" height="960"
+                 muted loop playsinline preload="none"
+                 aria-label="A navy book-style rigid box opening to printed tissue and an inner tray"></video>
+          <button class="film__toggle" type="button" aria-label="Pause video">
+            <svg class="film__ic film__ic--pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5h3v14H8zM13 5h3v14h-3z" fill="currentColor"/></svg>
+            <svg class="film__ic film__ic--play"  viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>
+          </button>
+        </div>
+        <figcaption>
+          <strong>Book-style rigid box</strong>
+          <span>Hinged lid, printed tissue, inner tray</span>
+        </figcaption>
+        <a class="film__cta" href="#quote" data-track="cta-film-book">Quote a box like this</a>
+      </figure>
+
+      <figure class="film">
+        <div class="film__frame">
+          <video class="film__vid" data-src="assets/video/rigid-lidbase.mp4"
+                 poster="assets/video/rigid-lidbase.jpg"
+                 width="540" height="960"
+                 muted loop playsinline preload="none"
+                 aria-label="A red two-piece rigid box, lid lifted off and a candle taken out"></video>
+          <button class="film__toggle" type="button" aria-label="Pause video">
+            <svg class="film__ic film__ic--pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5h3v14H8zM13 5h3v14h-3z" fill="currentColor"/></svg>
+            <svg class="film__ic film__ic--play"  viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>
+          </button>
+        </div>
+        <figcaption>
+          <strong>Two-piece lid &amp; base</strong>
+          <span>Snug lift-off lid, fitted candle well</span>
+        </figcaption>
+        <a class="film__cta" href="#quote" data-track="cta-film-lidbase">Quote a box like this</a>
+      </figure>
+
+    </div>
+
+    <p class="films__note">Sound is off by default &mdash; these are silent loops, so nothing
+    will start talking at you.</p>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════
      WORK GALLERY
      Drop your photos into assets/img/ using the exact filenames in
      the src attributes below and the placeholders disappear.
@@ -246,14 +317,14 @@
 
     <div class="gallery" id="gallery">
 
-      <!-- 1 · AFC — navy magnetic closure, collapsible -->
+      <!-- 1 · Botanica — two-piece lid & base, printed lid wrap -->
       <figure class="shot shot--wide">
         <img src="assets/img/boxes/box-1.jpg"
-             alt="Navy magnetic closure rigid box with white and red printed logo on a marble surface"
-             width="800" height="600" loading="lazy" decoding="async"
+             alt="Botanica rigid box: navy base with a full-colour botanical printed lid, closed"
+             width="1194" height="896" loading="lazy" decoding="async"
              data-open="assets/img/boxes/box-1.1.jpg"
-             data-caption="Magnetic closure, collapsible rigid · 2mm greyboard · matte navy wrap · white screen print with red accent · ships flat, snaps up with hidden magnets">
-        <figcaption><strong>Magnetic closure &mdash; collapsible</strong><span>Matte navy, ships flat, hidden magnets</span></figcaption>
+             data-caption="Two-piece lid & base · full-colour botanical print across the lid wrap · uncoated navy base · white inner tray · lid lifts clean off">
+        <figcaption><strong>Two-piece lid &amp; base</strong><span>Printed lid wrap, uncoated navy base</span></figcaption>
       </figure>
 
       <!-- 2 · PBS North Carolina — black drawer, silver foil -->
@@ -312,10 +383,22 @@
          page stays on-message for rigid box searches. -->
     <aside class="also">
       <div class="also__thumbs">
-        <img src="assets/img/boxes/also-1.jpg" alt="Pink printed corrugated mailer box, opened"
-             width="200" height="200" loading="lazy" decoding="async">
-        <img src="assets/img/boxes/also-2.jpg" alt="White and blue printed corrugated mailer box, opened"
-             width="200" height="200" loading="lazy" decoding="async">
+        <video class="film__vid" data-src="assets/video/carton-flower.mp4"
+               poster="assets/video/carton-flower.jpg" width="360" height="640"
+               muted loop playsinline preload="none"
+               aria-label="A floral printed folding carton opened to lift out a candle"></video>
+        <video class="film__vid" data-src="assets/video/carton-soap.mp4"
+               poster="assets/video/carton-soap.jpg" width="360" height="640"
+               muted loop playsinline preload="none"
+               aria-label="A pink folding carton being folded up around a bar of soap"></video>
+        <video class="film__vid" data-src="assets/video/carton-tart.mp4"
+               poster="assets/video/carton-tart.jpg" width="360" height="640"
+               muted loop playsinline preload="none"
+               aria-label="White printed folding cartons being assembled by hand"></video>
+        <video class="film__vid" data-src="assets/video/carton-otriea.mp4"
+               poster="assets/video/carton-otriea.jpg" width="360" height="640"
+               muted loop playsinline preload="none"
+               aria-label="A printed skincare folding carton turned to show each panel"></video>
       </div>
       <p><strong>We also print corrugated mailers and folding cartons.</strong>
       Same press, same finishing team &mdash; useful if your rigid box needs an outer shipper, or if
@@ -660,33 +743,6 @@
       <details><summary>What artwork files do you need?</summary><div><p>Print-ready vector artwork (AI, EPS or PDF) at 300dpi with CMYK or Pantone values, laid out on the dieline we supply. No artwork ready? Our design team places your logo and assets on the dieline at no charge.</p></div></details>
       <details><summary>Do you offer eco-friendly rigid packaging?</summary><div><p>Yes. FSC&reg;-certified boards, recycled greyboard, soy-based inks, kraft and uncoated wraps, and plastic-free molded pulp or honeycomb inserts. Ask for the sustainable spec and we&rsquo;ll quote it alongside the standard build.</p></div></details>
     </div>
-  </div>
-</section>
-
-<!-- ════════════════════════════════════════════════════════════
-     YOUTUBE SHORTS — click-to-load facades.
-     The tiles below are built by JS from the SHORTS list at the top
-     of assets/js/main.js. Paste your Shorts links there; thumbnails
-     come straight from YouTube so there is nothing to upload, and
-     nothing from youtube.com loads until a visitor actually clicks
-     (a cold YouTube iframe costs ~700KB and would wreck the LCP on
-     a paid landing page). With no links pasted the whole section
-     hides itself rather than showing empty boxes.
-     ════════════════════════════════════════════════════════════ -->
-<section class="sec sec--cream" id="video" hidden>
-  <div class="wrap">
-    <header class="sechead">
-      <h2>Watch a rigid box come together</h2>
-      <p>Shorts straight off our production floor &mdash; the wrap going on, the corners turned by hand,
-      the magnets closing. Filmed at Xperts Packaging, our sister factory, which is where your boxes are made.</p>
-    </header>
-
-    <div class="videos" id="shorts"></div>
-
-    <p class="videos__social">
-      More on
-      <a href="https://www.youtube.com/@xpertspackaging/shorts" target="_blank" rel="noopener" data-track="social-youtube">YouTube&nbsp;Shorts</a>
-    </p>
   </div>
 </section>
 

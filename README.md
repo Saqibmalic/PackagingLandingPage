@@ -14,8 +14,9 @@ submit-lead.php       PHP lead handler (2 stages, uploads, CSV backup)
 google-apps-script.gs Google Sheets backend — no server needed (see section 2)
 robots.txt
 assets/css/styles.css All styling. Brand tokens live in :root at the top.
-assets/js/main.js     Two-step flow, validation, tracking, gallery, video facades
-assets/img/           Gallery photos + video posters (placeholders ship with it)
+assets/js/main.js     Two-step flow, validation, tracking, gallery, video autoplay
+assets/img/boxes/     Gallery photos (some still placeholders)
+assets/video/         Silent looping clips + their poster frames
 uploads/              Created on first artwork upload (see Security below)
 ```
 
@@ -58,7 +59,7 @@ redirects to the thank-you page. Nothing is lost.
 | 3 | Replace `REPLACE_LEAD_LABEL` / `REPLACE_CALL_LABEL` conversion labels | `assets/js/main.js` (top), `thank-you.html` |
 | 4 | Replace the three `REPLACE —` testimonials with **real, attributable** quotes | `index.html` → `#reviews` |
 | 4b | Add your box photos (section 5) | `assets/img/boxes/` |
-| 4c | Paste your Shorts links into `SHORTS` and the Trustpilot figures into `TRUSTPILOT` (sections 5–6) | `assets/js/main.js` (top) |
+| 4c | Paste the Trustpilot figures into `TRUSTPILOT` (section 6) | `assets/js/main.js` (top) |
 | 5 | Choose your backend and set `BACKEND` (see section 2) | `assets/js/main.js` (top) |
 | 6 | Set the recipient email — `NOTIFY_EMAIL` (Sheets) or `$TO`/`$FROM` (PHP) | `google-apps-script.gs` / `submit-lead.php` |
 | 7 | Update `<link rel="canonical">` and the OG URLs to the real URL | `index.html` (head) |
@@ -178,8 +179,8 @@ naming convention, so most of your photos only need the prefix added:
 
 | File | Export at | Aspect | Shown as | Which box |
 |---|---|---|---|---|
-| `box-1.jpg` | **1600 × 1200** | 4:3 landscape | wide tile | **AFC** — navy magnetic closure, collapsible |
-| `box-1.1.jpg` | **1600 × 1200** | 4:3 landscape | lightbox "open" | same box, open |
+| `box-1.jpg` | ✅ **done** — Botanica | 4:3 landscape | wide tile | navy base, printed botanical lid |
+| `box-1.1.jpg` | ✅ **done** — Botanica | 4:3 landscape | lightbox "open" | same box, lid lifted |
 | `box-2.jpg` | **1200 × 1200** | 1:1 square | square tile | **PBS North Carolina** — black drawer, silver foil |
 | `box-2.1.jpg` | **1600 × 1200** | 4:3 landscape | lightbox "open" | same box, drawer out |
 | `box-3.jpg` | **1200 × 1200** | 1:1 square | square tile | **FOX** — sunflower two-piece lid & base |
@@ -190,8 +191,6 @@ naming convention, so most of your photos only need the prefix added:
 | `box-5.1.jpg` | **1600 × 1200** | 4:3 landscape | lightbox "open" | same box, open |
 | `box-6.jpg` | **1200 × 1200** | 1:1 square | square tile | your next rigid box |
 | `box-6.1.jpg` | **1600 × 1200** | 4:3 landscape | lightbox "open" | same box, open |
-| `also-1.jpg` | **200 × 200** | 1:1 square | 74px thumbnail | Pelham pink corrugated mailer |
-| `also-2.jpg` | **200 × 200** | 1:1 square | 74px thumbnail | Medable white/blue corrugated mailer |
 
 **All files: JPEG, sRGB colour profile, under 200KB each** (the `.1` open shots may go to 250KB —
 they are only fetched when someone opens the lightbox). Strip EXIF on export.
@@ -208,7 +207,8 @@ for a 3000px file nobody sees.
 2. **Leave a little air around the box.** Roughly 8–10% margin on each side. A box cropped tight
    to its own edges looks cramped, and the caption bar sits over the bottom of the tile.
 
-Captions for boxes 1–3 are already written from the actual photos. Boxes 4–6 are marked
+Box 1 is done — the Botanica lid-and-base shots are in place, closed in the grid and open in the
+lightbox. Captions for boxes 2–3 are written from your earlier photos. Boxes 4–6 are marked
 `REPLACE` in `index.html` — update the `data-caption` (shown in the lightbox) and the
 `<figcaption>` when you add them.
 
@@ -231,37 +231,55 @@ Export at 82% JPEG quality and run anything still over the limit through
 **If a photo is missing, that tile hides itself** rather than showing a broken image. If all six
 are missing, the whole section disappears. Safe to publish at any stage.
 
-### YouTube Shorts — one line each, no HTML
+### Videos — self-hosted, silent, autoplaying
 
-The Shorts strip sits at the bottom of the page, right before the final call to action, and is
-built from a list at the top of `assets/js/main.js`:
+Two sections carry video, and both are built from files in `assets/video/`:
 
-```js
-var SHORTS = [
-  'https://www.youtube.com/shorts/AbCdEfGhIjK | Magnetic closure unboxing',
-  'https://www.youtube.com/shorts/LmNoPqRsTuV | Gold foil on the press',
-  'https://www.youtube.com/shorts/WxYzAbCdEfG | Hand-wrapped corners',
-  'https://www.youtube.com/shorts/HiJkLmNoPqR | Drawer box, ribbon pull'
-];
+| Section | Files | Size on screen |
+|---|---|---|
+| **Film wall** (`#film`, above the photo gallery) | `rigid-book`, `rigid-lidbase` | 340px wide, 9:16 |
+| **Folding-carton note** (below the gallery) | `carton-flower`, `carton-soap`, `carton-tart`, `carton-otriea` | 74px thumbnails |
+
+Each needs two files with the same stem: `name.mp4` (the clip) and `name.jpg` (the poster
+frame). To add one, encode it to match and copy the `<figure class="film">` block in
+`index.html`.
+
+**Encoding recipe** — this is what the current clips were made with:
+
+```bash
+ffmpeg -ss 3 -t 10 -i source.mp4 -an \
+  -vf "scale=540:960:force_original_aspect_ratio=increase,crop=540:960" \
+  -c:v libx264 -profile:v high -pix_fmt yuv420p \
+  -crf 30 -preset slow -movflags +faststart out.mp4
+
+ffmpeg -ss 4.5 -i source.mp4 -frames:v 1 \
+  -vf "scale=540:960:force_original_aspect_ratio=increase,crop=540:960" \
+  -q:v 5 out.jpg
 ```
 
-Open a Short from <https://www.youtube.com/@xpertspackaging/shorts>, copy the address bar, paste
-it between the quotes. Anything after the `|` becomes the caption under the tile; drop the `|`
-and the caption if you do not want one. A bare 11-character video ID works too.
+Four parts of that matter:
 
-**There are no image files to prepare** — thumbnails are pulled from YouTube automatically at the
-right vertical crop. The strip lays out 1 to 6 tiles evenly; four to six looks best. On phones it
-becomes a swipeable row, one Short at a time, which is how people actually watch these.
+- **`-an` strips the audio.** These are silent loops. A landing page that starts talking is a
+  landing page people close.
+- **`-movflags +faststart`** moves the index to the front of the file so playback begins on the
+  first chunk instead of after the whole download.
+- **`-ss` / `-t` cut a short clip.** 8–13 seconds is the target. A loop is more compelling than
+  a long take, and a 30-second clip is three times the bytes for less effect.
+- **540×960** is roughly 1.6× the on-screen size — sharp on a retina phone without paying for
+  a file nobody can see the detail in.
 
-Nothing loads from YouTube until a visitor clicks — the tile is just a thumbnail until then. That
-is deliberate: a normal YouTube embed pulls ~700KB of scripts per video and would wreck the load
-speed this page currently has. Clicking swaps in the real player and fires a `video_play` event.
+Keep each clip **under ~750KB**. All six together are 2.7MB, and a visitor who never scrolls
+past the hero downloads **none** of it.
 
-**Which Shorts to pick:** process over product. A box being wrapped, a corner being turned, foil
-hitting the press, a drawer sliding out. Static beauty shots are already covered by the gallery;
-the Shorts earn their place by proving there is a real factory behind the quote form.
+**How playback works.** No `<video>` has a `src` in the HTML — only `data-src`. An
+IntersectionObserver in `main.js` assigns the real URL when a tile is about to enter the
+viewport, plays it, and pauses it again when it leaves. So nothing competes with the LCP,
+off-screen clips do not drain a phone battery, and anyone whose OS asks for reduced motion gets
+the poster frame with a play button instead.
 
-**With the list empty the whole section stays hidden**, so it is safe to publish now.
+**Why not YouTube.** An embed costs ~700KB per tile before a frame plays, stamps someone else's
+branding on your product, and puts a "watch on YouTube" exit door on a page you are paying
+\$8–25 a click to fill. Self-hosting is smaller, cleaner, and keeps the visitor on the form.
 
 ### Why there is no live Instagram feed
 

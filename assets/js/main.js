@@ -42,21 +42,6 @@
                  'in assets/js/main.js — until you do, form submissions will not be saved.');
   }
 
-  /* ---- YouTube Shorts strip ---------------------------------
-     Paste Shorts links from https://www.youtube.com/@xpertspackaging/shorts
-     — open a Short, copy the address bar, paste it between the quotes.
-     Full URL or bare video ID both work. Add a caption after a "|"
-     if you want one under the tile. Four to six is the sweet spot.
-     Thumbnails are pulled from YouTube automatically; nothing else
-     to upload. Leave them empty and the whole section stays hidden.
-     ---------------------------------------------------------- */
-  var SHORTS = [
-    'https://www.youtube.com/shorts/CENCqM33ino',   // e.g. 'https://www.youtube.com/shorts/AbCdEfGhIjK | Magnetic closure unboxing'
-    'https://www.youtube.com/shorts/-sCSFOT5Nmk',
-    'https://www.youtube.com/shorts/mUTy10ssnS0',
-    'https://www.youtube.com/shorts/HDSudQpWsdM'
-  ];
-
   /* ---- Sister-brand Trustpilot ------------------------------
      From https://www.trustpilot.com/review/xpertspackaging.com —
      type the TrustScore and the review count exactly as shown there.
@@ -354,41 +339,6 @@
     });
   }
 
-  /* ================= YouTube Shorts strip =================== */
-  /* Tiles are generated from SHORTS above so adding a video is a
-     one-line paste, never an HTML edit. Thumbnails come from
-     i.ytimg.com; Shorts publish a vertical maxresdefault, and we fall
-     back to hqdefault for the odd upload that does not. */
-  var shortsWrap = document.getElementById('shorts');
-  if (shortsWrap) {
-    SHORTS.forEach(function (entry) {
-      var parts   = String(entry || '').split('|');
-      var raw     = parts[0].trim();
-      var caption = (parts[1] || '').trim();
-      if (!raw) return;
-
-      // Accept a full watch/shorts/youtu.be URL or a bare ID.
-      var m = raw.match(/(?:shorts\/|watch\?v=|youtu\.be\/|embed\/)?([\w-]{11})(?:[?&#].*)?$/);
-      if (!m) return;
-      var id = m[1];
-
-      var fig = document.createElement('figure');
-      fig.className = 'vid vid--tall';
-      fig.innerHTML =
-        '<button class="vfacade" type="button" data-video="' + id + '" data-track="video-play" ' +
-                'aria-label="Play video' + (caption ? ': ' + caption : '') + '">' +
-          '<img src="https://i.ytimg.com/vi/' + id + '/maxresdefault.jpg" alt="" ' +
-               'width="405" height="720" loading="lazy" decoding="async" ' +
-               'onerror="this.onerror=null;this.src=\'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg\'">' +
-          '<span class="vfacade__play" aria-hidden="true">' +
-            '<svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>' +
-          '</span>' +
-        '</button>' +
-        (caption ? '<figcaption>' + caption + '</figcaption>' : '');
-      shortsWrap.appendChild(fig);
-    });
-  }
-
   /* ---- Never show unfinished content to a visitor ----------
      Tiles, testimonials and the Trustpilot figures all ship with
      placeholder text. Rather than risk that text going live, anything
@@ -437,28 +387,93 @@
     reviewsSec.hidden = true;
   }
 
-  /* ================= Video facades ========================= */
-  /* Nothing is requested from YouTube until someone clicks, so the
-     embeds cost no page weight and cannot affect Core Web Vitals. */
-  $$('.vfacade').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      var id = btn.getAttribute('data-video');
-      if (!id) return;
-      var frame = document.createElement('iframe');
-      frame.src = 'https://www.youtube-nocookie.com/embed/' + id +
-                  '?autoplay=1&rel=0&modestbranding=1&playsinline=1';
-      frame.title = btn.getAttribute('aria-label') || 'Rigid box video';
-      frame.allow = 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture';
-      frame.allowFullscreen = true;
-      btn.replaceWith(frame);
-      track('video_play', { video_id: id });
-    });
-  });
+  /* ================= Film wall ============================== */
+  /* Silent looping clips that behave like moving photographs.
 
-  /* No Shorts pasted into SHORTS yet? Drop the section entirely. */
-  var videoSec = document.getElementById('video');
-  if (videoSec) {
-    videoSec.hidden = !$$('.vfacade', videoSec).length;
+     Three rules make this cheap enough for a paid landing page:
+       1. No <video> carries a src until it is about to be seen, so a
+          visitor who never scrolls past the hero downloads nothing.
+       2. A tile that leaves the viewport pauses — otherwise six clips
+          decode in the background and drain a phone battery.
+       3. Anyone who has asked their OS for reduced motion gets the
+          poster frame and a play button instead of autoplay.
+
+     Autoplay is only permitted because every clip is muted and carries
+     `playsinline`; without both, iOS refuses and the tile would sit on
+     its poster frame forever. */
+  var reduceMotion = window.matchMedia &&
+                     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var films = $$('.film__vid');
+
+  var loadFilm = function (v) {
+    if (v.getAttribute('src')) return;
+    var src = v.getAttribute('data-src');
+    if (src) v.src = src;
+  };
+
+  var playFilm = function (v) {
+    loadFilm(v);
+    var p = v.play();
+    // Safari rejects the promise if the tab is backgrounded mid-call.
+    if (p && p.catch) p.catch(function () {});
+  };
+
+  var syncToggle = function (v) {
+    var btn = v.parentNode.querySelector('.film__toggle');
+    if (!btn) return;
+    var paused = v.paused;
+    btn.setAttribute('data-paused', paused ? '1' : '0');
+    btn.setAttribute('aria-label', paused ? 'Play video' : 'Pause video');
+  };
+
+  if (films.length) {
+    films.forEach(function (v) {
+      v.addEventListener('play',  function () { syncToggle(v); });
+      v.addEventListener('pause', function () { syncToggle(v); });
+      syncToggle(v);
+    });
+
+    // Tapping the tile itself toggles playback, so the whole surface is
+    // the control on a phone — not just the 38px button.
+    $$('.film__toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var v = btn.parentNode.querySelector('.film__vid');
+        if (!v) return;
+        if (v.paused) { playFilm(v); track('video_play', { src: v.getAttribute('data-src') }); }
+        else v.pause();
+      });
+    });
+
+    if (reduceMotion || !('IntersectionObserver' in window)) {
+      // No observer, or motion is unwelcome: load on demand only. The
+      // poster still shows, so the section never looks broken.
+      films.forEach(function (v) { v.setAttribute('data-paused', '1'); syncToggle(v); });
+    } else {
+      var filmObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          var v = entry.target;
+          if (entry.isIntersecting) {
+            if (!v.dataset.userPaused) playFilm(v);
+          } else if (!v.paused) {
+            v.pause();
+          }
+        });
+      }, { rootMargin: '150px 0px', threshold: 0.35 });
+
+      films.forEach(function (v) {
+        filmObserver.observe(v);
+        // A deliberate pause must survive scrolling away and back.
+        v.addEventListener('pause', function () {
+          if (!v.ended && document.visibilityState === 'visible' &&
+              v.getBoundingClientRect().top < window.innerHeight &&
+              v.getBoundingClientRect().bottom > 0) {
+            v.dataset.userPaused = '1';
+          }
+        });
+        v.addEventListener('play', function () { delete v.dataset.userPaused; });
+      });
+    }
   }
 
   /* ================= Tracking on all CTAs ================== */
