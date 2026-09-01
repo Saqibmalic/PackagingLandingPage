@@ -42,6 +42,21 @@
                  'in assets/js/main.js — until you do, form submissions will not be saved.');
   }
 
+  /* ---- YouTube Shorts strip ---------------------------------
+     Paste Shorts links from https://www.youtube.com/@xpertspackaging/shorts
+     — open a Short, copy the address bar, paste it between the quotes.
+     Full URL or bare video ID both work. Add a caption after a "|"
+     if you want one under the tile. Four to six is the sweet spot.
+     Thumbnails are pulled from YouTube automatically; nothing else
+     to upload. Leave them empty and the whole section stays hidden.
+     ---------------------------------------------------------- */
+  var SHORTS = [
+    'https://www.youtube.com/shorts/CENCqM33ino',   // e.g. 'https://www.youtube.com/shorts/AbCdEfGhIjK | Magnetic closure unboxing'
+    'https://www.youtube.com/shorts/-sCSFOT5Nmk',
+    'https://www.youtube.com/shorts/mUTy10ssnS0',
+    'https://www.youtube.com/shorts/HDSudQpWsdM'
+  ];
+
   /* ---- Sister-brand Trustpilot ------------------------------
      From https://www.trustpilot.com/review/xpertspackaging.com —
      type the TrustScore and the review count exactly as shown there.
@@ -339,6 +354,41 @@
     });
   }
 
+  /* ================= YouTube Shorts strip =================== */
+  /* Tiles are generated from SHORTS above so adding a video is a
+     one-line paste, never an HTML edit. Thumbnails come from
+     i.ytimg.com; Shorts publish a vertical maxresdefault, and we fall
+     back to hqdefault for the odd upload that does not. */
+  var shortsWrap = document.getElementById('shorts');
+  if (shortsWrap) {
+    SHORTS.forEach(function (entry) {
+      var parts   = String(entry || '').split('|');
+      var raw     = parts[0].trim();
+      var caption = (parts[1] || '').trim();
+      if (!raw) return;
+
+      // Accept a full watch/shorts/youtu.be URL or a bare ID.
+      var m = raw.match(/(?:shorts\/|watch\?v=|youtu\.be\/|embed\/)?([\w-]{11})(?:[?&#].*)?$/);
+      if (!m) return;
+      var id = m[1];
+
+      var fig = document.createElement('figure');
+      fig.className = 'vid vid--tall';
+      fig.innerHTML =
+        '<button class="vfacade" type="button" data-video="' + id + '" data-track="video-play" ' +
+                'aria-label="Play video' + (caption ? ': ' + caption : '') + '">' +
+          '<img src="https://i.ytimg.com/vi/' + id + '/maxresdefault.jpg" alt="" ' +
+               'width="405" height="720" loading="lazy" decoding="async" ' +
+               'onerror="this.onerror=null;this.src=\'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg\'">' +
+          '<span class="vfacade__play" aria-hidden="true">' +
+            '<svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>' +
+          '</span>' +
+        '</button>' +
+        (caption ? '<figcaption>' + caption + '</figcaption>' : '');
+      shortsWrap.appendChild(fig);
+    });
+  }
+
   /* ---- Never show unfinished content to a visitor ----------
      Tiles, testimonials and the Trustpilot figures all ship with
      placeholder text. Rather than risk that text going live, anything
@@ -474,6 +524,30 @@
         v.addEventListener('play', function () { delete v.dataset.userPaused; });
       });
     }
+  }
+
+  /* ================= Video facades ========================= */
+  /* Nothing is requested from YouTube until someone clicks, so the
+     embeds cost no page weight and cannot affect Core Web Vitals. */
+  $$('.vfacade').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var id = btn.getAttribute('data-video');
+      if (!id) return;
+      var frame = document.createElement('iframe');
+      frame.src = 'https://www.youtube-nocookie.com/embed/' + id +
+                  '?autoplay=1&rel=0&modestbranding=1&playsinline=1';
+      frame.title = btn.getAttribute('aria-label') || 'Rigid box video';
+      frame.allow = 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture';
+      frame.allowFullscreen = true;
+      btn.replaceWith(frame);
+      track('video_play', { video_id: id });
+    });
+  });
+
+  /* No Shorts pasted into SHORTS yet? Drop the section entirely. */
+  var videoSec = document.getElementById('video');
+  if (videoSec) {
+    videoSec.hidden = !$$('.vfacade', videoSec).length;
   }
 
   /* ================= Tracking on all CTAs ================== */
