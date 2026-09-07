@@ -5,9 +5,11 @@
    FLOW
    ----
    Step 1 (contact) posts on its own and is banked as a lead
-   immediately — an abandon on step 2 still leaves a contactable
-   person. Step 2 enriches that same lead_id with box specs.
-   The Google Ads lead conversion fires when step 1 completes.
+   immediately, then the visitor is sent to thank-you.html — where the
+   ONE Google Ads "Quote Form Submit" conversion fires on page load,
+   with the email attached for Enhanced Conversions. Step 2 (box specs)
+   is offered there too, enriching the same lead_id. So an abandon after
+   step 1 still leaves a counted, contactable lead.
    ============================================================ */
 (function () {
   'use strict';
@@ -15,6 +17,13 @@
   /* ---- Google Ads conversion labels -------------------------
      Replace with the values from Google Ads > Goals > Conversions.
      Format: 'AW-XXXXXXXXXX/AbCdEfGhIjKlMnOp'
+       lead — "Quote Form Submit" (your ONE Primary web conversion).
+              Fired on thank-you.html. Also paste the AW-... id into the
+              gtag snippet in the <head> of index.html AND thank-you.html.
+       call — website click-to-call. Mark this action SECONDARY in Google
+              Ads; your Primary call conversion is "Calls from ads" on the
+              call asset (Google forwarding number, 60s), set in the
+              dashboard — no website code.
      ---------------------------------------------------------- */
   var CONVERSIONS = {
     lead: 'AW-XXXXXXXXXX/REPLACE_LEAD_LABEL',
@@ -171,6 +180,17 @@
   };
 
   /* ---- One transport for both backends --------------------- */
+  /* Mirror the ad-click context into the hidden form fields, so gclid and
+     the utm_* set also ride along on a native (no-JS) POST, and are visible
+     in the DOM for debugging. */
+  var fillHiddenAdFields = function () {
+    var ctx = adContext();
+    $$('input[type="hidden"][name]').forEach(function (input) {
+      if (ctx[input.name] != null) input.value = ctx[input.name];
+    });
+  };
+  fillHiddenAdFields();
+
   var post = function (payload) {
     return fetch(BACKEND.url, {
       method: 'POST',
@@ -205,23 +225,13 @@
   var lastFocus = null;
   var supportsDialog = modal && typeof modal.showModal === 'function';
 
-  var showPane = function (which) {
-    if (!modal) return;
-    [step1, specForm, donePane].forEach(function (el) { if (el) el.hidden = true; });
-    if (which === 1) {
-      step1.hidden = false;
-      stepLbl.textContent = 'Step 1 of 2 · Contact';
-      progress.style.width = '50%';
-    } else if (which === 2) {
-      specForm.hidden = false;
-      stepLbl.textContent = 'Step 2 of 2 · Box specification';
-      progress.style.width = '100%';
-    } else {
-      donePane.hidden = false;
-      stepLbl.textContent = 'Request received';
-      progress.style.width = '100%';
-    }
-    modal.querySelector('.modal__body').scrollTop = 0;
+  /* The modal is a single contact step now — Step 2 (box specs) lives on
+     the thank-you page, reached after the lead has been saved. */
+  var showPane = function () {
+    if (!modal || !step1) return;
+    step1.hidden = false;
+    var body = modal.querySelector('.modal__body');
+    if (body) body.scrollTop = 0;
   };
 
   var openModal = function (which, source) {
@@ -251,11 +261,6 @@
     modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
     modal.addEventListener('close', function () { document.body.classList.remove('modal-open'); });
 
-    var skip = $('[data-modal-skip]');
-    if (skip) skip.addEventListener('click', function () {
-      track('spec_step_skipped', {});
-      showPane(3);
-    });
   }
 
   /* ================= Work gallery lightbox ================= */
@@ -585,9 +590,6 @@
     if (hp && hp.value) return;                          // bot
     if (!validateForm(form)) return;
 
-    track('conversion', { send_to: CONVERSIONS.lead });
-    track('generate_lead', { form: form.id, value: 1, currency: 'USD' });
-
     var btn = form.querySelector('button[type=submit]');
     var label = btn ? btn.textContent : '';
     if (btn) { btn.disabled = true; btn.textContent = 'Saving your details…'; }
@@ -599,15 +601,27 @@
     var ctx = adContext();
     Object.keys(ctx).forEach(function (k) { payload[k] = ctx[k]; });
 
-    var advance = function () {
-      $('#spec-lead-id').value = leadId;
-      if (modal && (modal.open || modal.hasAttribute('open'))) showPane(2);
-      else openModal(2, 'step1-complete');
+    /* Lead saved → hand the essentials to the thank-you page (via
+       sessionStorage, so no PII rides in the URL) and go there. The one
+       "Quote Form Submit" conversion fires on that page, with the email
+       attached for Enhanced Conversions. */
+    var onSaved = function () {
       track('contact_step_complete', {});
+      try {
+        sessionStorage.setItem('cbe_lead', JSON.stringify({
+          lead_id: leadId,
+          email: payload.email || '', name: payload.name || '', phone: payload.phone || '',
+          gclid: payload.gclid || '', gbraid: payload.gbraid || '', wbraid: payload.wbraid || '',
+          utm_source: payload.utm_source || '', utm_medium: payload.utm_medium || '',
+          utm_campaign: payload.utm_campaign || '', utm_term: payload.utm_term || '',
+          utm_content: payload.utm_content || ''
+        }));
+      } catch (e) {}
+      location.href = 'thank-you.html';
     };
 
     post(payload)
-      .then(advance)
+      .then(onSaved)
       .catch(function () {
         /* Endpoint unreachable. Fall back to a native form POST so the
            lead still reaches you rather than vanishing. */
@@ -672,6 +686,13 @@
       payload.lead_id = leadId || $('#spec-lead-id').value || newLeadId();
       var ctx = adContext();
       Object.keys(ctx).forEach(function (k) { payload[k] = ctx[k]; });
+      /* The thank-you URL carries no gclid — restore the ad context saved
+         at Step 1 so this update keeps the same attribution. */
+      try {
+        var s1 = JSON.parse(sessionStorage.getItem('cbe_lead') || '{}');
+        ['gclid','gbraid','wbraid','utm_source','utm_medium','utm_campaign','utm_term','utm_content']
+          .forEach(function (k) { if (!payload[k] && s1[k]) payload[k] = s1[k]; });
+      } catch (e) {}
 
       Promise.all(files.map(readFile))
         .then(function (encoded) {
@@ -680,14 +701,68 @@
         })
         .then(function () {
           track('spec_step_complete', {});
-          location.href = 'thank-you.html';
+          var card = document.getElementById('ty-spec-card');
+          var done = document.getElementById('ty-spec-done');
+          if (done) {
+            if (card) card.hidden = true;
+            done.hidden = false;
+            done.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          } else {
+            location.href = 'thank-you.html';
+          }
         })
         .catch(function () {
           if (btn) { btn.disabled = false; btn.textContent = label; }
           alert('We could not send the specs just now, but your contact details are already ' +
                 'saved and a specialist will call you. You can also reach us on (888) 716-1078.');
-          showPane(3);
         });
     });
   }
+
+  /* ================= Thank-you page ========================
+     Fires the ONE "Quote Form Submit" conversion here — page-load based
+     (reliable), after Step 1 was saved — and attaches the buyer's email
+     for Enhanced Conversions. Also wires the optional Step-2 spec form. */
+  if (document.body && document.body.getAttribute('data-page') === 'thank-you') {
+    var saved = {};
+    try { saved = JSON.parse(sessionStorage.getItem('cbe_lead') || '{}'); } catch (e) {}
+    var email = String(saved.email || '').trim().toLowerCase();
+
+    var ecEmail = $('#ec-email'); if (ecEmail && email) ecEmail.value = email;
+    var sid = $('#spec-lead-id'); if (sid && saved.lead_id) sid.value = saved.lead_id;
+    if (saved.lead_id) leadId = saved.lead_id;
+
+    var hasSaved  = !!(saved && (saved.lead_id || saved.email));
+    var firedId = '', firedPost = '';
+    try { firedId = sessionStorage.getItem('cbe_fired_id') || ''; } catch (e) {}
+    try { firedPost = sessionStorage.getItem('cbe_fired_post') || ''; } catch (e) {}
+    var cameFromPost = /submit-lead\.php/i.test(document.referrer || '');
+    var shouldFire = (hasSaved && firedId !== (saved.lead_id || '')) ||
+                     (!hasSaved && cameFromPost && !firedPost);
+
+    if (shouldFire) {
+      if (typeof gtag === 'function') {
+        if (email) gtag('set', 'user_data', { email: email });   // Enhanced Conversions (gtag)
+        gtag('event', 'conversion', { send_to: CONVERSIONS.lead });
+      }
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({ event: 'lead_submitted', lead_id: saved.lead_id || '',
+                              enhanced_conversion: { email: email } });   // Enhanced Conversions (GTM)
+      track('generate_lead', { value: 1, currency: 'USD' });
+      try {
+        if (hasSaved) sessionStorage.setItem('cbe_fired_id', saved.lead_id || '');
+        else sessionStorage.setItem('cbe_fired_post', '1');
+      } catch (e) {}
+    }
+
+    var tySkip = $('[data-ty-skip]');
+    if (tySkip) tySkip.addEventListener('click', function () {
+      track('spec_step_skipped', {});
+      var card = document.getElementById('ty-spec-card');
+      var done = document.getElementById('ty-spec-done');
+      if (card) card.hidden = true;
+      if (done) { done.hidden = false; done.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+    });
+  }
+
 })();

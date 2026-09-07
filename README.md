@@ -26,27 +26,32 @@ Every "get a quote" button opens a modal. The hero form is step 1 inline; both p
 the same place.
 
 ```
-Step 1 — name, email, phone, quantity
-   │     ↓ posts on its own, gets a lead_id back
-   │     ↓ LEAD CONVERSION FIRES HERE
+Step 1 — name, email, phone, quantity   (hero form OR modal)
+   │     ↓ posts on its own, banks the lead, gets a lead_id
    │     ↓ you receive "New Rigid Box Lead — call this person now"
    ▼
-Step 2 — L×W×D + units, style, board, wrap, insert, finishing,
-         compare quantity, in-hands date, artwork upload, notes
+thank-you.html
+   │     ↓ THE "Quote Form Submit" CONVERSION FIRES HERE (on page load)
+   │     ↓ with the buyer's email attached for Enhanced Conversions
+   ▼
+Step 2 (optional, on the thank-you page) — L×W×D + units, style, board,
+         wrap, insert, finishing, compare quantity, in-hands date,
+         artwork upload, notes
          ↓ posts as a follow-up against the same lead_id
          ↓ you receive "Box Specs Added [LEAD ID]"
-         └─ or they hit "Skip — I'll send specs later" and you
-            still have a fully contactable lead
+         └─ or they just wait for your call — the lead + conversion
+            are already counted either way
 ```
 
 **Why step 1 posts by itself:** a long spec form that only submits at the end throws away every
-buyer who quits halfway. Here the contact record is banked the moment it is complete, so the
-detailed questions can be as thorough as you like without costing you leads. The Google Ads
-conversion fires at step 1 for the same reason — that is the moment you actually got something
-of value.
+buyer who quits halfway. Here the contact record is banked the moment it is complete, then the
+visitor is sent to the thank-you page. The **one Google Ads conversion fires there, on page
+load** — the reliable place for it, and where the email is present so Enhanced Conversions can
+match. Box specs are then offered on the thank-you page as an optional extra; the lead and the
+conversion are already counted, so nothing depends on them being filled.
 
 If JavaScript is unavailable the hero form posts normally as a complete stage-1 lead and
-redirects to the thank-you page. Nothing is lost.
+redirects to the thank-you page, where the conversion still fires. Nothing is lost.
 
 ---
 
@@ -56,7 +61,7 @@ redirects to the thank-you page. Nothing is lost.
 |---|------|-------|
 | 1 | Replace `AW-XXXXXXXXXX` with your Google Ads conversion ID | `index.html`, `thank-you.html` (head) |
 | 2 | Replace `G-XXXXXXXXXX` with your GA4 measurement ID | `index.html`, `thank-you.html` (head) |
-| 3 | Replace `REPLACE_LEAD_LABEL` / `REPLACE_CALL_LABEL` conversion labels | `assets/js/main.js` (top), `thank-you.html` |
+| 3 | Replace `REPLACE_LEAD_LABEL` / `REPLACE_CALL_LABEL` conversion labels | `assets/js/main.js` (top) — fired on `thank-you.html` |
 | 4 | Replace the three `REPLACE —` testimonials with **real, attributable** quotes | `index.html` → `#reviews` |
 | 4b | Add your box photos (section 5) | `assets/img/boxes/` |
 | 4c | Paste the Trustpilot figures into `TRUSTPILOT` (section 6) | `assets/js/main.js` (top) |
@@ -331,19 +336,51 @@ The three `REPLACE —` testimonial cards below it still need real, attributable
 
 ## 7. Google Ads setup
 
-### Conversion actions
-Create two, both **Primary**:
+### Conversion actions — the exact setup this page is wired for
 
-| Action | Type | Counting | Value |
-|---|---|---|---|
-| Rigid Quote Form | Website → `generate_lead` | One | Set a value (e.g. $40 = margin × close rate) |
-| Rigid Phone Call | Website → phone click | One | Same |
+**Two Primary conversions. Everything else Secondary or removed.** Mixing five "primary"
+actions teaches the algorithm to chase whatever is easiest to trigger; two clean primaries
+teach it to chase buyers.
 
-Values matter more than most advertisers think: with values set you can move from Maximize
-Conversions to **Maximize Conversion Value** or **tROAS** once you have ~30 conversions/month.
+**1. Quote Form Submit — Primary (the money conversion).**
+Type: Website. It fires on **`thank-you.html`, on page load**, after Step 1 is saved — not on
+the button click. (Firing on click counts people who never actually submitted, and fires before
+the lead is even saved.) The page is already wired this way: `main.js` fires
+`gtag('event','conversion',{send_to: CONVERSIONS.lead})` on the thank-you page. Paste your real
+label into `CONVERSIONS.lead` in `assets/js/main.js`. Counting: **One**.
 
-Both fire automatically — the form conversion fires on submit *and* on `thank-you.html`
-(Google de-duplicates), and every `tel:` link on the page fires the call conversion.
+**2. Calls from ads — Primary.**
+This is a **Google Ads dashboard setting, not website code.** Turn on call reporting, add a
+**call asset** with a **Google forwarding number**, and set the phone-call conversion to a
+**60-second minimum**. B2B packaging buyers pick up the phone; if this is Secondary the algorithm
+learns to ignore your best leads. Nothing to change on the site for this one.
+
+**3. Enhanced Conversions for leads.**
+The page hands Google the buyer's **email** on the thank-you page so Google can match the lead
+back to the ad click on your weekly upload. It is wired **two ways**, so it works however you tag:
+- **gtag (works today, no GTM needed):** `main.js` calls `gtag('set','user_data',{email})`
+  before the conversion. Google hashes the email in the browser — the raw value never leaves it.
+- **GTM (if you route through a container):** the email is also written into a hidden
+  `#ec-email` field and pushed to `dataLayer` as `lead_submitted.enhanced_conversion.email`.
+  In GTM, create a **User-Provided Data** variable → **Manual** → Email = that field (or the
+  dataLayer key) and enable Enhanced Conversions on the tag.
+Then turn Enhanced Conversions **on** in Google Ads (Conversion action → Settings → Enhanced
+conversions → Google tag / GTM).
+
+**4. GCLID capture.**
+Every form now has a hidden `gclid` field (plus `gbraid`, `wbraid` and the `utm_*` set),
+filled from the URL on load and written to your lead sheet next to the email and timestamp —
+that is the `GCLID` column in the Google Sheet. This is what lets you upload **offline
+conversions** later (which leads actually closed), so Google optimises toward revenue, not
+toward form-fills. Keep the sheet's `Timestamp`, `Email` and `GCLID` columns — the offline
+upload needs all three.
+
+Set a **value** on the Quote Form Submit action (e.g. margin × close-rate) once you have data;
+with values in place you can graduate from Maximize Conversions to **tROAS**.
+
+> The website also fires a click-to-call conversion on every `tel:` link (`CONVERSIONS.call`).
+> That is a *different* action from "Calls from ads" above — mark this website-call action
+> **Secondary** so it doesn't compete with the forwarding-number call conversion.
 
 ### Ad group structure — one page, tight themes
 
