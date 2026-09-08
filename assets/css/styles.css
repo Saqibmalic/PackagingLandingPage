@@ -355,6 +355,8 @@ body.modal-open{overflow:hidden}
 .style:hover{border-color:var(--navy);box-shadow:var(--shadow)}
 .style__art{background:var(--mint);border-radius:var(--radius-sm);padding:12px;margin-bottom:16px}
 .style__art svg{display:block;width:100%;height:auto}
+.style__art--photo{padding:0;overflow:hidden;background:var(--mint);aspect-ratio:160/130}
+.style__art--photo img{display:block;width:100%;height:100%;object-fit:cover}
 .style__art .f-top{fill:#fff;stroke:var(--navy);stroke-width:2;stroke-linejoin:round}
 .style__art .f-left{fill:var(--navy);opacity:.92}
 .style__art .f-right{fill:var(--navy-lt);opacity:.85}
