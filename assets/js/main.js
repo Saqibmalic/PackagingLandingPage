@@ -38,11 +38,11 @@
      Both receive the same JSON payload.
      ---------------------------------------------------------- */
   var BACKEND = {
-    mode: 'sheets',
-    url:  'PASTE_YOUR_APPS_SCRIPT_EXEC_URL_HERE'
-    /* Own PHP hosting instead? Use:
-       mode: 'php',
-       url:  'submit-lead.php'                                                    */
+    mode: 'php',
+    url:  'submit-lead.php'
+    /* Static host with no PHP (GitHub Pages, Netlify)? Use:
+       mode: 'sheets',
+       url:  'PASTE_YOUR_APPS_SCRIPT_EXEC_URL_HERE'                               */
   };
 
   if (BACKEND.url.indexOf('PASTE_YOUR') === 0) {

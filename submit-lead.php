@@ -15,6 +15,8 @@
  * action at that endpoint and delete this file.
  */
 
+require_once __DIR__ . '/lib/leads-store.php';   // SQLite store behind /dashboard
+
 // ── Configuration ────────────────────────────────────────────
 $TO         = 'info@customboxesexperts.com';
 $BCC        = '';                                   // optional second recipient
@@ -31,7 +33,9 @@ $isAjax = (
     (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'fetch')
 );
 
-$respond = static function (array $payload, int $code = 200) use ($isAjax, $THANK_YOU) {
+// $isAjax is captured by reference: the JSON-body check further down flips it
+// after these closures are defined.
+$respond = static function (array $payload, int $code = 200) use (&$isAjax, $THANK_YOU) {
     if ($isAjax) {
         http_response_code($code);
         header('Content-Type: application/json; charset=utf-8');
@@ -43,7 +47,7 @@ $respond = static function (array $payload, int $code = 200) use ($isAjax, $THAN
     exit;
 };
 
-$fail = static function (string $message, int $code) use ($isAjax) {
+$fail = static function (string $message, int $code) use (&$isAjax) {
     http_response_code($code);
     if ($isAjax) {
         header('Content-Type: application/json; charset=utf-8');
@@ -194,6 +198,16 @@ if ($stage === 1) {
     $csv([date('c'), $leadId, 1, $name, $email, $phone, $quantity, '', '', '', '', '', '', '',
           '', '', '', '', '', '', $gclid, $source, $medium, $campaign, $term, $content]);
 
+    cbe_save_contact([
+        'lead_id'  => $leadId,   'name'   => $name,  'email' => $email,
+        'phone'    => $phone,    'quantity' => $quantity,
+        'gclid'    => $gclid,    'gbraid' => $clean('gbraid', 200), 'wbraid' => $clean('wbraid', 200),
+        'utm_source' => $source, 'utm_medium' => $medium, 'utm_campaign' => $campaign,
+        'utm_term' => $term,     'utm_content' => $content, 'page_url' => $pageUrl,
+        'ip'       => $_SERVER['REMOTE_ADDR'] ?? '',
+        'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? '',
+    ]);
+
     $respond(['ok' => true, 'lead_id' => $leadId]);
 }
 
@@ -304,5 +318,14 @@ $send('Box Specs Added [' . ($leadId !== '' ? $leadId : 'no id') . ']', $body, '
 $csv([date('c'), $leadId, 2, '', '', '', '', $quantity2, $length, $width, $depth, $units,
       $style, $board, $wrap, $insert, $finish, $needBy, $notes, implode(' | ', $saved),
       $gclid, $source, $medium, $campaign, $term, $content]);
+
+cbe_save_specs([
+    'lead_id' => $leadId, 'length' => $length, 'width' => $width, 'depth' => $depth,
+    'units'   => $units,  'style'  => $style,  'board' => $board, 'wrap'  => $wrap,
+    'insert'  => $insert, 'finish' => $finish, 'quantity2' => $quantity2,
+    'need_by' => $needBy, 'notes'  => $notes,  'files' => implode(' | ', $saved),
+    'gclid'   => $gclid,  'utm_source' => $source, 'utm_medium' => $medium,
+    'utm_campaign' => $campaign, 'utm_term' => $term, 'utm_content' => $content,
+]);
 
 $respond(['ok' => true, 'lead_id' => $leadId]);

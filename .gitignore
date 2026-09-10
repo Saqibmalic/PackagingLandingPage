@@ -1,3 +1,7 @@
 # Lead data and uploads never belong in version control
 leads.csv
 uploads/
+data/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm

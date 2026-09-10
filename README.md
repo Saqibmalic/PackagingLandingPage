@@ -107,14 +107,114 @@ Lost. The `GCLID` column is what you will need later for offline conversion uplo
 
 This option needs **no server at all**, which means the page can live on free static hosting.
 
-### Option B — `submit-lead.php` on your own hosting
+### Option B — `submit-lead.php` + the leads dashboard (this is the shipped default)
 
-Emails each stage to `$TO` and appends to `leads.csv`, saving artwork under `uploads/`.
-Needs PHP 7.4+ and a working `mail()`. This is the default in the shipped config.
+Emails each stage to `$TO`, appends to `leads.csv`, saves artwork under `uploads/`, **and**
+writes the lead into a SQLite database that powers the dashboard at `/dashboard/`.
+Needs PHP 8.0+ with `pdo_sqlite` (standard on any Namecheap VPS) and a working `mail()`.
+
+See [§2b — The leads dashboard](#2b-the-leads-dashboard) below.
 
 You can also point `BACKEND.url` at a Zapier or Make webhook, or a CRM endpoint — anything that
 accepts a JSON POST. The payload keys are the field `name` attributes plus `stage`, `lead_id`,
 `gclid`, the `utm_*` set, `page_url`, and `files[]` as `{name, type, data}` with base64 `data`.
+
+<a id="2b-the-leads-dashboard"></a>
+## 2b. The leads dashboard
+
+Every lead the form captures lands in a private dashboard at **`https://yourdomain.com/dashboard/`**.
+It is plain PHP + SQLite — no database server to install, no monthly fee, nothing to sign up for.
+
+### What is in it
+
+- **Summary cards** — total leads, today, last 7 days, how many came from Google Ads,
+  how many completed the spec step, and how much won business you have logged.
+- **One row per enquiry.** Stage 1 (contact) creates the row, stage 2 (box specs + artwork)
+  fills the same row in, so you never see the same person twice.
+- **Details** opens the full record: box size, style, board, wrap, insert, finishing, needed-by
+  date, what they typed in the notes box, plus the full attribution trail
+  (GCLID, source, medium, campaign, keyword, ad content, landing page, IP).
+- **Status and value you can edit.** Move a lead through New → Contacted → Quoted → Won /
+  Lost / Spam and type in what the deal was worth. It saves the moment you change it.
+- **Your own notes** per lead — call outcome, quoted price, next step.
+- **Filters** — free-text search, status, date range, Google-Ads-only, has-specs.
+  Whatever you filter to is exactly what the downloads contain.
+
+### Signing in
+
+Go to `/dashboard/`. Out of the box **demo mode is on, so any username and password works** —
+`admin` / `boxes123` is the suggested pair.
+
+**Turn demo mode off before you send real traffic.** In `dashboard/config.php` set
+`'demo_mode' => false` and add your own account:
+
+```bash
+php -r 'echo password_hash("your-real-password", PASSWORD_DEFAULT), "\n";'
+```
+
+Paste the hash it prints into the `users` array. Sessions time out after 4 hours idle.
+
+### The three downloads
+
+| Button | What it is | What to do with it |
+|---|---|---|
+| **Google Ads conversions (GCLID)** | One row per lead that arrived with a Google click ID | Google Ads → Goals → Conversions → **Uploads** → upload the file |
+| **Enhanced conversions for leads** | Email + phone, SHA-256 hashed and normalised exactly as Google specifies | Same upload screen — use this for leads with no GCLID |
+| **All lead data (plain CSV)** | Every field, human-readable | Excel, Google Sheets, or a CRM import |
+
+Before downloading, check the four boxes above the buttons:
+
+- **Conversion action name** must match the name in Google Ads *character for character*
+  (Goals → Conversions → Summary). If it does not match, the upload is rejected.
+- **Time zone** must be your **Google Ads account's** time zone, not your server's. It is written
+  into the file's first line as `Parameters:TimeZone=…` and Google reads the timestamps against it.
+- **Currency** and **default value per lead**. A lead with its own value typed in overrides the
+  default — so mark your won deals with their real value, filter to `Won`, and upload that:
+  Smart Bidding then optimises for revenue instead of raw form fills.
+
+Uploading these is what closes the loop. Without it Google only knows a form was submitted;
+with it Google learns which *keywords and audiences* actually produce paying customers.
+
+### Deploying it to your Namecheap VPS
+
+The dashboard is PHP, and **GitHub Pages cannot run PHP** — so the site needs to be served
+from your VPS (or any PHP host) for both the form handler and the dashboard to work.
+
+```bash
+# on the VPS, as the web user
+cd /var/www/customboxesexperts.com          # your document root
+git clone -b claude/rigid-boxes-landing-page-at2dae \
+    https://github.com/saqibmalic/packaginglandingpage.git .
+
+# the app writes to these three; the web user must own them
+mkdir -p data uploads
+chown -R www-data:www-data data uploads
+chmod 750 data
+```
+
+That is all the setup there is — the database file creates itself on the first lead.
+
+**Keep the lead data out of the web root.** `data/` ships with an `.htaccess` that denies
+access, but on nginx (which ignores `.htaccess`) point the app somewhere private instead:
+
+```nginx
+# nginx: block the data directory outright
+location ^~ /data/ { deny all; return 404; }
+```
+
+or set `CBE_DATA_DIR=/var/lib/cbe-leads` in your PHP-FPM pool and the store follows it there.
+
+Back it up with a plain file copy — `data/leads.sqlite` *is* the whole database:
+
+```bash
+sqlite3 data/leads.sqlite ".backup '/root/backups/leads-$(date +%F).sqlite'"
+```
+
+### Testing after deploy
+
+Submit a real enquiry through your own form, then open `/dashboard/` — it should be at the top
+of the list within a second, tagged **Google Ads** if you clicked through an ad. Click
+**Details** to check the attribution came through, then delete it with **Delete lead**.
 
 ## 3. Testing it on a throwaway domain
 
