@@ -17,10 +17,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- Fonts load without blocking first paint: text renders instantly in the
-     system fallback, then swaps to Poppins/Lato when they arrive. -->
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Lato:wght@400;700&display=swap">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Lato:wght@400;700&display=swap" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Lato:wght@400;700&display=swap"></noscript>
+     system fallback, then swaps to Plus Jakarta Sans / Source Sans 3 when they arrive. -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap"></noscript>
 <link rel="stylesheet" href="assets/css/styles.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%231A3163'/><path d='M16 6l8 4.6v9.2L16 24.4 8 19.8v-9.2z' fill='none' stroke='%23F2A65A' stroke-width='2'/><rect x='12.5' y='12.5' width='7' height='7' rx='1.5' fill='%23F2A65A'/></svg>">
 
@@ -147,8 +147,9 @@
         <div class="proof"><strong>1 hr</strong><span>quote response<br>in business hours</span></div>
       </div>
 
-      <p class="hero__sister">Part of the <strong>Xperts Packaging</strong> group &mdash; same owners,
-      same factory floor, same project managers, 10+ years of rigid box production behind us.</p>
+      <p class="hero__cred">We don&rsquo;t broker your job out. <strong>Structure, print, foil, wrap and
+      hand-assembly happen on our own floor</strong> &mdash; one project manager, one quality standard,
+      one person to call when the date matters.</p>
     </div>
 
     <!-- Lead form -->
@@ -621,40 +622,6 @@
 <section class="sec sec--cream" id="reviews">
   <div class="wrap">
     <header class="sechead"><h2>What buyers say after the first run</h2></header>
-    <!-- ══════════════════════════════════════════════════════════
-         SISTER-BRAND TRUSTPILOT
-         The rating below belongs to Xperts Packaging, NOT to Custom
-         Boxes Experts. The wording and the labels keep that explicit —
-         do not remove them and do not restyle this to read as if the
-         reviews were left for this company. Presenting another
-         business's reviews as your own breaches Google Ads'
-         misrepresentation policy and Trustpilot's terms.
-         Fill the rating and review count in TRUSTPILOT at the top of
-         assets/js/main.js — the block stays hidden until you do.
-         ══════════════════════════════════════════════════════════ -->
-    <aside class="tp">
-      <p class="tp__flag">From our sister company</p>
-      <div class="tp__in">
-        <div class="tp__score">
-          <span class="tp__num">RATING</span>
-          <span class="tp__stars" aria-hidden="true"></span>
-          <span class="tp__count">COUNT reviews on Trustpilot</span>
-        </div>
-        <div class="tp__body">
-          <p><strong>Xperts Packaging</strong> is our sister brand &mdash; same ownership, same production
-          floor and the same project managers who will handle your rigid box order. Its Trustpilot
-          profile is public, so you can read what customers say about how we actually work before you
-          give us anything.</p>
-          <p class="tp__note">These reviews were left for Xperts Packaging, not for Custom Boxes Experts.
-          Custom Boxes Experts is building its own Trustpilot profile.</p>
-          <a class="tp__link" href="https://www.trustpilot.com/review/xpertspackaging.com"
-             target="_blank" rel="noopener nofollow" data-track="trustpilot-click">
-            Read the reviews on Trustpilot
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </a>
-        </div>
-      </div>
-    </aside>
 
     <div class="grid grid--3 quotes">
       <figure class="quote">
@@ -709,16 +676,16 @@
 <section class="sec sec--cream" id="video" hidden>
   <div class="wrap">
     <header class="sechead">
-      <h2>Straight from our channel</h2>
-      <p>The rest of what we post &mdash; presses running, boxes being wrapped, jobs going out the door.
-      Filmed at Xperts Packaging, our sister factory, which is where your boxes are made.</p>
+      <h2>Sixty seconds on our factory floor</h2>
+      <p>No stock footage, no showreel. Presses running, wraps going on by hand, finished boxes
+      being packed &mdash; filmed where your order will actually be made.</p>
     </header>
 
     <div class="videos" id="shorts"></div>
 
-    <p class="videos__social">
+    <p class="videos__social" hidden>
       More on
-      <a href="https://www.youtube.com/@xpertspackaging/shorts" target="_blank" rel="noopener" data-track="social-youtube">YouTube&nbsp;Shorts</a>
+      <a href="#" target="_blank" rel="noopener" data-track="social-youtube" data-channel-link>YouTube&nbsp;Shorts</a>
     </p>
   </div>
 </section>
@@ -750,7 +717,7 @@
         </svg>
         <span class="logo__txt"><strong>CUSTOM</strong><em>Boxes Experts</em></span>
       </a>
-      <p>Custom rigid and luxury setup box manufacturing for US and Canadian brands. Structural design, printing, finishing and delivery under one project manager. A sister company of <a href="https://www.xpertspackaging.com/" target="_blank" rel="noopener">Xperts Packaging</a>.</p>
+      <p>Custom rigid and luxury setup boxes for US and Canadian brands. Structural design, printing, foiling, finishing and delivery run under one project manager &mdash; and nothing goes to press until you have approved a sample you can hold.</p>
     </div>
     <div class="foot__col">
       <h3>Contact</h3>

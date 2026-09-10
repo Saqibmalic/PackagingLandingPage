@@ -52,31 +52,21 @@
   }
 
   /* ---- YouTube Shorts strip ---------------------------------
-     Paste Shorts links from https://www.youtube.com/@xpertspackaging/shorts
-     — open a Short, copy the address bar, paste it between the quotes.
-     Full URL or bare video ID both work. Add a caption after a "|"
-     if you want one under the tile. Four to six is the sweet spot.
-     Thumbnails are pulled from YouTube automatically; nothing else
-     to upload. Leave them empty and the whole section stays hidden.
+     Open one of your own Shorts, copy the address bar, paste it
+     between the quotes. Full URL or bare video ID both work. Add a
+     caption after a "|" if you want one under the tile. Four to six
+     is the sweet spot. Thumbnails are pulled from YouTube
+     automatically; nothing else to upload. Leave the list empty and
+     the whole section stays hidden.
      ---------------------------------------------------------- */
   var SHORTS = [
-    'https://www.youtube.com/shorts/CENCqM33ino',   // e.g. 'https://www.youtube.com/shorts/AbCdEfGhIjK | Magnetic closure unboxing'
-    'https://www.youtube.com/shorts/-sCSFOT5Nmk',
-    'https://www.youtube.com/shorts/mUTy10ssnS0',
-    'https://www.youtube.com/shorts/HDSudQpWsdM'
+    // 'https://www.youtube.com/shorts/AbCdEfGhIjK | Magnetic closure unboxing'
   ];
 
-  /* ---- Sister-brand Trustpilot ------------------------------
-     From https://www.trustpilot.com/review/xpertspackaging.com —
-     type the TrustScore and the review count exactly as shown there.
-     The block stays hidden until both are filled, and it is labelled
-     as Xperts Packaging's rating on purpose: presenting another
-     company's reviews as your own breaches Google Ads' policy.
-     ---------------------------------------------------------- */
-  var TRUSTPILOT = {
-    rating: '',   // e.g. '4.8'
-    count:  ''    // e.g. '126'
-  };
+  /* Your channel's Shorts page, e.g.
+     'https://www.youtube.com/@customboxesexperts/shorts'. Left empty,
+     the "More on YouTube Shorts" line stays hidden. */
+  var SHORTS_CHANNEL = '';
 
   var MAX_FILES = 5;
   var MAX_FILE_BYTES = 10 * 1024 * 1024;   // 10MB — base64 inflates payloads ~33%
@@ -394,15 +384,23 @@
     });
   }
 
+  /* The channel link only appears once there is a channel to send
+     people to — a dead link on a paid landing page costs clicks. */
+  var channelLink = $('[data-channel-link]');
+  if (channelLink && /^https?:\/\//.test(SHORTS_CHANNEL)) {
+    channelLink.href = SHORTS_CHANNEL;
+    channelLink.closest('.videos__social').hidden = false;
+  }
+
   /* ---- Never show unfinished content to a visitor ----------
-     Tiles, testimonials and the Trustpilot figures all ship with
-     placeholder text. Rather than risk that text going live, anything
-     still holding a placeholder removes itself, and a section whose
-     content is entirely placeholder disappears with it. */
+     Gallery tiles and testimonials ship with placeholder text. Rather
+     than risk that text going live, anything still holding a
+     placeholder removes itself, and a section whose content is
+     entirely placeholder disappears with it. */
   var isPlaceholder = function (el) {
     if (!el) return false;
     var t = (el.textContent || '') + (el.getAttribute && el.getAttribute('data-caption') || '');
-    return /REPLACE|\bRATING\b|\bCOUNT\b/.test(t);
+    return /REPLACE/.test(t);
   };
 
   /* Gallery tiles that have not been described yet */
@@ -419,26 +417,8 @@
   var quotesWrap = $('.quotes');
   if (quotesWrap && !$$('.quote:not([hidden])', quotesWrap).length) quotesWrap.hidden = true;
 
-  /* Trustpilot block — filled from TRUSTPILOT, hidden until it is set */
-  var tp = $('.tp');
-  if (tp) {
-    var rating = parseFloat(TRUSTPILOT.rating);
-    if (rating > 0 && String(TRUSTPILOT.count).replace(/\D/g, '')) {
-      var count = String(TRUSTPILOT.count).replace(/\D/g, '');
-      $('.tp__num', tp).textContent   = TRUSTPILOT.rating;
-      $('.tp__count', tp).textContent = Number(count).toLocaleString('en-US') +
-                                        ' reviews on Trustpilot';
-      // Whole stars only — a half star drawn as a full one overstates the score.
-      $('.tp__stars', tp).textContent = new Array(Math.round(rating) + 1).join('\u2605');
-      $('.tp__score', tp).setAttribute('aria-label',
-        TRUSTPILOT.rating + ' out of 5 on Trustpilot, from ' + count + ' reviews');
-    } else {
-      tp.hidden = true;
-    }
-  }
-
   var reviewsSec = document.getElementById('reviews');
-  if (reviewsSec && (!quotesWrap || quotesWrap.hidden) && (!tp || tp.hidden)) {
+  if (reviewsSec && (!quotesWrap || quotesWrap.hidden)) {
     reviewsSec.hidden = true;
   }
 

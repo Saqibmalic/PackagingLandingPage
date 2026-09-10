@@ -3,6 +3,11 @@
 A single-purpose, ads-optimized landing page for **custom rigid boxes only**, built to match the
 customboxesexperts.com theme (navy `#1A3163`, amber `#F2A65A`, mint `#D0F3EC`, cream `#FEF6E9`).
 
+Type is **Plus Jakarta Sans** for headings, buttons and labels — geometric, tightly drawn, and
+premium next to the navy/amber palette — over **Source Sans 3** for body copy, a humanist face
+built to stay readable at 17px on a phone. Both load from Google Fonts without blocking first
+paint. Change the pair in one place: `--font-head` and `--font-body` in `:root`.
+
 Static HTML/CSS/JS — no build step, no framework, no dependencies. Drop it on any host.
 
 ```
@@ -400,39 +405,31 @@ You asked about embedding Instagram. I'd advise against it *on this page* specif
   or a holiday post dilutes the message.
 
 The video strip above does the same job with none of those costs: your content, curated, on your
-page, with the quote form still one tap away. The Instagram and YouTube links at the bottom of
-that section is there for people who genuinely want to go follow you — after they have seen the
-boxes.
+page, with the quote form still one tap away.
 
-## 6. Reviews and the sister-brand Trustpilot
+**The Shorts strip.** Paste your own Shorts links into `SHORTS` at the top of
+`assets/js/main.js` — a full URL or a bare video ID, optionally followed by `| a caption`. Four
+to six is the sweet spot. Thumbnails come from YouTube automatically and nothing loads from
+youtube.com until a visitor clicks, so the tiles cost the page nothing. Leave the list empty and
+the section hides itself. Set `SHORTS_CHANNEL` to your channel's Shorts URL to show the "More on
+YouTube Shorts" line underneath; leave it empty and that line stays hidden rather than pointing
+at a dead link.
 
-The reviews block shows the **Xperts Packaging** Trustpilot rating, explicitly labelled as a
-sister company. Fill it in at the top of `assets/js/main.js`:
+## 6. Reviews
 
-```js
-var TRUSTPILOT = {
-  rating: '4.8',   // the TrustScore shown on the profile
-  count:  '126'    // the review count shown on the profile
-};
-```
+The three `REPLACE —` testimonial cards need real, attributable quotes before you run traffic.
+Until they are filled in, `main.js` hides each placeholder card, and hides the whole reviews
+section if none of them are real yet — so nothing unfinished can reach a visitor.
 
-Both from <https://www.trustpilot.com/review/xpertspackaging.com>. The stars are drawn from the
-rating automatically, and the block stays hidden until both values are set.
+Google Ads prohibits fabricated testimonials, so use quotes you can actually stand behind: a
+name, a title and a brand, from a buyer who agreed to be quoted. One specific line ("the
+pre-production sample landed on a Tuesday and we shipped the run three weeks later") outperforms
+three generic ones.
 
-**Do not restyle this to look like Custom Boxes Experts' own reviews, and do not remove the
-"From our sister company" badge or the italic note.** Presenting another business's reviews as
-your own breaches Google Ads' misrepresentation policy and Trustpilot's terms of use — and on a
-lead-gen account, a misrepresentation strike is one of the harder ones to appeal.
-
-Labelled honestly it still works: shared ownership and a shared production floor is a real,
-checkable claim, and a buyer who clicks through sees genuine reviews of the same team.
-
-**The better fix is to claim your own profile.** Trustpilot is free to start: claim
-`customboxesexperts.com`, then email your last 50 delivered orders an invitation. Rigid box
-buyers are high-satisfaction customers when the box lands well — you will get reviews. Once you
-have 20+, swap this block for your own TrustBox widget and the labelling problem disappears.
-
-The three `REPLACE —` testimonial cards below it still need real, attributable quotes.
+**Claim your own Trustpilot profile.** It is free to start: claim `customboxesexperts.com`, then
+email your last 50 delivered orders an invitation. Rigid box buyers are high-satisfaction
+customers when the box lands well. Once you have 20 or more reviews, drop a TrustBox widget into
+this section.
 
 ## 7. Google Ads setup
 

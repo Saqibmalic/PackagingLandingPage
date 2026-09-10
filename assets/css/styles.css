@@ -24,8 +24,12 @@
   --shadow:    0 1px 2px rgba(26,49,99,.06), 0 8px 28px rgba(26,49,99,.10);
   --shadow-lg: 0 2px 6px rgba(26,49,99,.08), 0 24px 60px rgba(26,49,99,.16);
 
-  --font-head: 'Poppins', 'Century Gothic', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-body: 'Lato', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  /* Headings and UI carry the brand: Plus Jakarta Sans is geometric enough
+     to feel premium next to the navy/amber palette, with tighter apertures
+     and better numerals than a rounded face. Source Sans 3 sets the body —
+     a humanist companion built for long reading at 17px on a phone. */
+  --font-head: 'Plus Jakarta Sans', 'Century Gothic', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-body: 'Source Sans 3', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 
   --wrap: 1180px;
 }
@@ -150,13 +154,13 @@ ul,ol{margin:0;padding:0;list-style:none}
 .proof strong{display:block;font-family:var(--font-head);font-size:1.5rem;font-weight:700;color:var(--navy);line-height:1.1}
 .proof span{font-size:.8rem;color:var(--muted);line-height:1.35;display:block;margin-top:4px}
 
-/* Group line — states the Xperts Packaging relationship up front, where
-   a buyer weighing an unfamiliar supplier is actually looking. */
-.hero__sister{
+/* Credibility line — answers "who actually makes this?" right where a
+   buyer weighing an unfamiliar supplier is looking. */
+.hero__cred{
   margin-top:18px;padding-top:16px;border-top:1px solid rgba(26,49,99,.12);
   font-size:.9rem;line-height:1.5;color:var(--muted);
 }
-.hero__sister strong{color:var(--navy)}
+.hero__cred strong{color:var(--navy)}
 
 /* ── Lead form ─────────────────────────────────────────────── */
 .formcard{
@@ -514,27 +518,6 @@ body.modal-open{overflow:hidden}
 .gallery__cta{display:flex;flex-direction:column;align-items:center;gap:12px}
 .gallery__hint{font-size:.88rem;color:var(--muted)}
 
-/* ── Sister-brand Trustpilot ───────────────────────────────── */
-.tp{
-  background:#fff;border:1px solid rgba(26,49,99,.12);border-radius:var(--radius);
-  padding:26px 28px;margin:0 0 34px;position:relative;
-}
-.tp__flag{
-  position:absolute;top:-12px;left:26px;margin:0;background:var(--navy);color:#fff;
-  font-family:var(--font-head);font-size:.78rem;font-weight:600;letter-spacing:.09em;
-  text-transform:uppercase;padding:5px 13px;border-radius:100px;
-}
-.tp__in{display:grid;grid-template-columns:190px 1fr;gap:28px;align-items:center}
-.tp__score{text-align:center;border-right:1px solid var(--line);padding-right:24px}
-.tp__num{display:block;font-family:var(--font-head);font-size:2.6rem;font-weight:700;color:var(--navy);line-height:1}
-.tp__stars{display:block;color:#00B67A;letter-spacing:3px;font-size:1.2rem;margin:8px 0 6px}
-.tp__count{display:block;font-size:.82rem;color:var(--muted)}
-.tp__body p{margin:0 0 10px;font-size:.96rem;color:var(--muted)}
-.tp__body strong{color:var(--navy)}
-.tp__note{font-size:.82rem!important;font-style:italic;padding-left:12px;border-left:3px solid var(--amber)}
-.tp__link{display:inline-flex;align-items:center;gap:7px;font-family:var(--font-head);font-weight:600;font-size:.94rem;color:var(--navy)}
-.tp__link svg{width:15px;height:15px}
-
 /* Specs */
 .specs{display:grid;grid-template-columns:repeat(2,1fr);gap:22px}
 .spec{background:#fff;border:1px solid rgba(26,49,99,.09);border-radius:var(--radius);padding:26px 26px 20px}
@@ -626,8 +609,6 @@ body.modal-open{overflow:hidden}
   .steps{grid-template-columns:repeat(2,1fr)}
   .film{flex:0 1 46%;max-width:300px}
   .vid{flex:0 1 46%;max-width:280px}
-  .tp__in{grid-template-columns:1fr;gap:20px}
-  .tp__score{border-right:0;border-bottom:1px solid var(--line);padding:0 0 18px}
   .foot__in{grid-template-columns:repeat(2,1fr)}
   .head__claim{display:none}
 }
@@ -668,7 +649,6 @@ body.modal-open{overflow:hidden}
   .vid{flex:0 0 62%;min-width:0;max-width:none;scroll-snap-align:center}
   .film__toggle{opacity:1}
   .also__thumbs .film__vid{width:62px;height:88px}
-  .tp{padding:22px 18px}
   .lb__nav{width:42px;height:42px}
   .lb__nav--prev{left:6px}
   .lb__nav--next{right:6px}
