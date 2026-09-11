@@ -95,12 +95,15 @@ class SpecFormTest extends TestCase
         Storage::fake('local');
         $lead = Lead::factory()->create();
 
+        // Refused the moment it lands, rather than after the buyer has filled
+        // in the rest of the form and pressed submit.
         Livewire::test(SpecForm::class, ['lead' => $lead])
             ->set('files', [UploadedFile::fake()->create('shell.php', 10)])
-            ->call('submit')
-            ->assertHasErrors(['files.0']);
+            ->assertHasErrors(['files.0'])
+            ->call('submit');
 
         $this->assertNull($lead->fresh()->files);
+        Storage::disk('local')->assertDirectoryEmpty(config('leads.upload_path'));
     }
 
     #[Test]
@@ -117,6 +120,50 @@ class SpecFormTest extends TestCase
             ->set('files', $files)
             ->call('submit')
             ->assertHasErrors(['files']);
+    }
+
+    #[Test]
+    public function a_refused_file_is_dropped_instead_of_blocking_every_later_submit(): void
+    {
+        Storage::fake('local');
+        $lead = Lead::factory()->create();
+
+        // Livewire appends on a multi-file input. Left in the array, one bad
+        // file would fail validation on every subsequent submit, and there was
+        // no way to take it out — the buyer could never finish.
+        $component = Livewire::test(SpecForm::class, ['lead' => $lead])
+            ->set('files', [UploadedFile::fake()->create('shell.php', 10)])
+            ->assertHasErrors(['files.0'])
+            ->assertSet('files', []);
+
+        $component->set('files', [UploadedFile::fake()->create('dieline.pdf', 400, 'application/pdf')])
+            ->assertHasNoErrors()
+            ->call('submit')
+            ->assertHasNoErrors();
+
+        $files = $lead->fresh()->files;
+        $this->assertCount(1, $files);
+        $this->assertSame('dieline.pdf', $files[0]['original']);
+    }
+
+    #[Test]
+    public function a_buyer_can_take_an_uploaded_file_back_out(): void
+    {
+        Storage::fake('local');
+        $lead = Lead::factory()->create();
+
+        Livewire::test(SpecForm::class, ['lead' => $lead])
+            ->set('files', [
+                UploadedFile::fake()->image('wrong.jpg'),
+                UploadedFile::fake()->image('right.jpg'),
+            ])
+            ->call('removeFile', 0)
+            ->assertCount('files', 1)
+            ->call('submit');
+
+        $files = $lead->fresh()->files;
+        $this->assertCount(1, $files);
+        $this->assertSame('right.jpg', $files[0]['original']);
     }
 
     #[Test]

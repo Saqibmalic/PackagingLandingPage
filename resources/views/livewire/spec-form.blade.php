@@ -115,8 +115,12 @@
             <p class="upload__status" wire:loading wire:target="files">Uploading&hellip;</p>
             @if ($files)
               <ul class="upload__list">
-                @foreach ($files as $file)
-                  <li>{{ $file->getClientOriginalName() }}</li>
+                @foreach ($files as $index => $file)
+                  <li>
+                    <span class="upload__name">{{ $file->getClientOriginalName() }}</span>
+                    <button type="button" class="upload__remove" wire:click="removeFile({{ $index }})"
+                            aria-label="Remove {{ $file->getClientOriginalName() }}">Remove</button>
+                  </li>
                 @endforeach
               </ul>
             @endif

@@ -7,6 +7,7 @@ use App\Models\Lead;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
@@ -99,6 +100,42 @@ class SpecForm extends Component
             'files.*.extensions' => 'We can read JPG, PNG, PDF, AI, EPS and ZIP files.',
             'need_by.after_or_equal' => 'Please choose a date in the future.',
         ];
+    }
+
+    /**
+     * Check each file the moment it lands rather than at submit. Livewire
+     * appends to the array on a multi-file input, so without this a rejected
+     * file stays in the list, blocks every later submit, and the buyer has no
+     * way to take it back out — they simply give up.
+     */
+    public function updatedFiles(): void
+    {
+        $this->validateOnly('files');
+
+        foreach (array_keys($this->files) as $index) {
+            try {
+                $this->validateOnly("files.{$index}");
+            } catch (ValidationException $e) {
+                // Drop the offending file so the rest of the upload survives,
+                // and keep the message that explains why it went.
+                unset($this->files[$index]);
+                $this->files = array_values($this->files);
+
+                throw $e;
+            }
+        }
+    }
+
+    /**
+     * Lets someone take a file back out — a wrong dieline, a photo they did
+     * not mean to attach.
+     */
+    public function removeFile(int $index): void
+    {
+        unset($this->files[$index]);
+        $this->files = array_values($this->files);
+
+        $this->resetValidation('files');
     }
 
     public function submit(): void
