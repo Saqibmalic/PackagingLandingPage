@@ -1,278 +1,348 @@
 # Rigid Boxes Landing Page — Custom Boxes Experts
 
-A single-purpose, ads-optimized landing page for **custom rigid boxes only**, built to match the
-customboxesexperts.com theme (navy `#1A3163`, amber `#F2A65A`, mint `#D0F3EC`, cream `#FEF6E9`).
+A single-purpose, ads-optimized landing page for **custom rigid boxes only**, plus a leads
+dashboard, built to match the customboxesexperts.com theme (navy `#1A3163`, amber `#F2A65A`,
+mint `#D0F3EC`, cream `#FEF6E9`).
 
 Type is **Plus Jakarta Sans** for headings, buttons and labels — geometric, tightly drawn, and
 premium next to the navy/amber palette — over **Source Sans 3** for body copy, a humanist face
 built to stay readable at 17px on a phone. Both load from Google Fonts without blocking first
 paint. Change the pair in one place: `--font-head` and `--font-body` in `:root`.
 
-Static HTML/CSS/JS — no build step, no framework, no dependencies. Drop it on any host.
+**Stack:** Laravel 13 · Livewire 4 · Blade · Vite · SQLite (or MySQL). The forms and the
+dashboard are Livewire components; everything else is plain Blade.
 
 ```
-index.html            The landing page + two-step quote modal
-thank-you.html        Post-submit page (noindex) where the conversion fires
-privacy-policy.html   Required by Google Ads — must be reachable
-terms.html            Trust/transparency signal for landing page quality
-submit-lead.php       PHP lead handler (2 stages, uploads, CSV backup)
-google-apps-script.gs Google Sheets backend — no server needed (see section 2)
-robots.txt
-assets/css/styles.css All styling. Brand tokens live in :root at the top.
-assets/js/main.js     Two-step flow, validation, tracking, gallery, video autoplay
-assets/img/boxes/     Gallery photos (some still placeholders)
-assets/video/         Silent looping clips + their poster frames
-uploads/              Created on first artwork upload (see Security below)
+app/
+  Http/Controllers/PageController.php        landing, thank-you, privacy, terms
+  Http/Controllers/Dashboard/                CSV exports, artwork downloads
+  Http/Middleware/CaptureAdContext.php       records gclid / utm_* per visit
+  Livewire/QuoteForm.php                     stage 1 — the contact form
+  Livewire/SpecForm.php                      stage 2 — box specs + artwork
+  Livewire/Dashboard/LeadsTable.php          the dashboard list
+  Livewire/Dashboard/LoginForm.php           sign-in
+  Mail/                                      the two alert emails
+  Models/Lead.php                            one row per enquiry
+  Support/AdContext.php                      click-id capture and storage
+  Support/GoogleAdsExport.php                the three CSV formats
+config/
+  site.php       phone, email, address, Shorts links — used by every page
+  leads.php      alert recipients, Google Ads conversion name, upload rules
+  dashboard.php  demo mode, the seeded account, page size
+  tracking.php   Google Ads + GA4 ids (read from .env)
+  faq.php        the FAQ — rendered on the page AND as FAQPage schema
+resources/
+  views/pages/          landing, thank-you, privacy, terms, dashboard
+  views/livewire/       the four Livewire component views
+  views/partials/       header, footer, schema, lightbox, quote modal
+  views/mail/           the two alert emails
+  css/app.css           the whole landing page. Brand tokens in :root.
+  css/dashboard.css     the dashboard
+  js/app.js             modal, lightbox, film wall, CTA tracking
+  js/shorts.js          click-to-load YouTube facades
+public/assets/          photos and video (see section 5)
+public/umrah/           an unrelated static microsite, served as-is
+database/migrations/    users (+ username) and leads
+tests/Feature/          46 tests covering the whole flow
 ```
+
+---
 
 ## The two-step quote flow
 
-Every "get a quote" button opens a modal. The hero form is step 1 inline; both paths land in
-the same place.
+Every "get a quote" button opens a modal holding the same Livewire form as the hero. Both paths
+land in the same place.
 
 ```
 Step 1 — name, email, phone, quantity   (hero form OR modal)
-   │     ↓ posts on its own, banks the lead, gets a lead_id
+   │     ↓ Livewire validates and saves the Lead, then redirects
    │     ↓ you receive "New Rigid Box Lead — call this person now"
    ▼
-thank-you.html
+/thank-you
    │     ↓ THE "Quote Form Submit" CONVERSION FIRES HERE (on page load)
    │     ↓ with the buyer's email attached for Enhanced Conversions
    ▼
 Step 2 (optional, on the thank-you page) — L×W×D + units, style, board,
          wrap, insert, finishing, compare quantity, in-hands date,
          artwork upload, notes
-         ↓ posts as a follow-up against the same lead_id
-         ↓ you receive "Box Specs Added [LEAD ID]"
+         ↓ updates the SAME lead row, no page reload
+         ↓ you receive "Box Specs Added [REFERENCE]"
          └─ or they just wait for your call — the lead + conversion
             are already counted either way
 ```
 
-**Why step 1 posts by itself:** a long spec form that only submits at the end throws away every
+**Why step 1 saves by itself:** a long spec form that only submits at the end throws away every
 buyer who quits halfway. Here the contact record is banked the moment it is complete, then the
 visitor is sent to the thank-you page. The **one Google Ads conversion fires there, on page
 load** — the reliable place for it, and where the email is present so Enhanced Conversions can
-match. Box specs are then offered on the thank-you page as an optional extra; the lead and the
-conversion are already counted, so nothing depends on them being filled.
+match. Box specs are then offered as an optional extra against the same lead.
 
-If JavaScript is unavailable the hero form posts normally as a complete stage-1 lead and
-redirects to the thank-you page, where the conversion still fires. Nothing is lost.
+**Two things the Laravel version does better than the static one it replaced.** The ad click is
+captured *server-side* by `CaptureAdContext` middleware and kept in the session, so an ad
+blocker or a JavaScript error can no longer cost you the `gclid` that offline conversion imports
+depend on. And the conversion flag is consumed with `session()->pull()`, so a reload or a
+back-button return to the thank-you page cannot count the same lead twice.
 
 ---
 
-## 1. Before you go live — 8 required edits
+## 1. Before you go live — required edits
 
-| # | What | Where |
-|---|------|-------|
-| 1 | Replace `AW-XXXXXXXXXX` with your Google Ads conversion ID | `index.html`, `thank-you.html` (head) |
-| 2 | Replace `G-XXXXXXXXXX` with your GA4 measurement ID | `index.html`, `thank-you.html` (head) |
-| 3 | Replace `REPLACE_LEAD_LABEL` / `REPLACE_CALL_LABEL` conversion labels | `assets/js/main.js` (top) — fired on `thank-you.html` |
-| 4 | Replace the three `REPLACE —` testimonials with **real, attributable** quotes | `index.html` → `#reviews` |
-| 4b | Add your box photos (section 5) | `assets/img/boxes/` |
-| 4c | Paste the Trustpilot figures into `TRUSTPILOT` (section 6) | `assets/js/main.js` (top) |
-| 5 | Choose your backend and set `BACKEND` (see section 2) | `assets/js/main.js` (top) |
-| 6 | Set the recipient email — `NOTIFY_EMAIL` (Sheets) or `$TO`/`$FROM` (PHP) | `google-apps-script.gs` / `submit-lead.php` |
-| 7 | Update `<link rel="canonical">` and the OG URLs to the real URL | `index.html` (head) |
-| 8 | Confirm turnaround, MOQ and price ranges match what sales can actually deliver | `index.html` throughout |
+Everything below is `.env`. No code changes.
 
-**Do not skip #4.** Google Ads prohibits fabricated testimonials, and a disapproval on a
-lead-gen page is hard to reverse.
+| Setting | What to put there |
+|---|---|
+| `APP_URL` | `https://your-subdomain.customboxesexperts.com` |
+| `APP_ENV` / `APP_DEBUG` | `production` / `false` — **never ship with debug on** |
+| `GOOGLE_ADS_ID` | `AW-XXXXXXXXXX` from Google Ads › Admin › Account settings |
+| `GOOGLE_ADS_LEAD_LABEL` | `AW-XXXXXXXXXX/AbCdEfGh` — the "Quote Form Submit" action |
+| `GOOGLE_ADS_CALL_LABEL` | the click-to-call action (mark it **secondary** in Google Ads) |
+| `GA4_MEASUREMENT_ID` | `G-XXXXXXXXXX`, optional but recommended |
+| `ADS_CONVERSION_NAME` | must match the conversion action name **character for character** |
+| `ADS_TIMEZONE` | the time zone of the **Google Ads account**, not the server |
+| `LEADS_NOTIFY_TO` | the inbox that should get every lead |
+| `MAIL_*` | a real mailbox on your domain (see section 4) |
+| `DASHBOARD_DEMO_MODE` | **`false`** — see section 2b |
+| `DASHBOARD_USERNAME` / `DASHBOARD_PASSWORD` | the dashboard account, then re-run `php artisan db:seed` |
+| `SITE_CANONICAL` | the public URL of this page, with a trailing slash |
+
+Leave any tracking id empty and **no tag is rendered at all** — the page runs clean locally and
+in tests. That also means: if you forget `GOOGLE_ADS_ID`, Google Ads counts nothing.
 
 ### Optional
-- Your homepage promises a quote **in 15 minutes**. This page says **1 hour**. Pick one and make it
-  consistent across the site — mismatched claims hurt both trust and ad review. Search
-  `within one hour` / `1 hr` / `1 business hour` in `index.html` to change it.
-- The local `privacy-policy.html` and `terms.html` are complete and ad-compliant. If you'd rather use
-  the live site's versions, swap the footer/consent links for those URLs — just make sure they load.
+
+| Setting | Effect |
+|---|---|
+| `LEADS_NOTIFY_CC` | comma-separated extra recipients |
+| `ADS_DEFAULT_VALUE` | the value exported for leads you have not marked won |
+| `SITE_SHORTS` | comma-separated YouTube Shorts URLs — the section appears once set |
+| `SITE_SHORTS_CHANNEL` | your channel's Shorts page, for the "More on YouTube Shorts" link |
 
 ---
 
-## 2. Where the leads go — pick one
+## 2. Where the leads go
 
-Set `BACKEND` at the top of `assets/js/main.js`. Both options receive the identical JSON
-payload, so you can switch later without touching anything else.
+Every submission writes a row to the `leads` table and emails `LEADS_NOTIFY_TO`. There is no
+second path to configure and no third-party service in the way.
 
-### Option A — Google Sheet (recommended if your agents work from a sheet)
+**A mail failure never costs you a lead.** The row is committed first; the send is wrapped in a
+try/catch that logs and moves on. If SMTP is down you still have the lead in the dashboard.
 
-One row per lead. Stage 1 creates the row with a **"New — call now"** status; stage 2 fills the
-spec columns in the *same row* and flips the status to **"Specs received"**. Artwork is saved to
-a Drive folder with the links in the row. You also get an email alert per stage.
+**Database.** SQLite is the default and is genuinely fine here — a landing page's lead volume is
+nowhere near its limits, and it needs no database server on the VPS. To use MySQL instead, set
+`DB_CONNECTION=mysql` and the usual `DB_*` values; the migrations are portable.
 
-Setup is in the header comment of `google-apps-script.gs` — about 5 minutes:
-create a sheet → Extensions → Apps Script → paste the file → Deploy as Web app
-(**Execute as: Me**, **Who has access: Anyone**) → copy the `/exec` URL → paste it into
-`BACKEND` as `{ mode: 'sheets', url: '…/exec' }`.
-
-Sheet columns: `Timestamp · Lead ID · Status · Name · Email · Phone · Quantity · Compare Qty ·
-Length · Width · Depth · Units · Box Style · Board · Wrap Stock · Insert · Finishing ·
-Needed By · Notes · Artwork · GCLID · Source · Medium · Campaign · Keyword · Content · Page URL`
-
-`Status` is a plain text cell — have your agents overwrite it with Contacted / Quoted / Won /
-Lost. The `GCLID` column is what you will need later for offline conversion uploads.
-
-This option needs **no server at all**, which means the page can live on free static hosting.
-
-### Option B — `submit-lead.php` + the leads dashboard (this is the shipped default)
-
-Emails each stage to `$TO`, appends to `leads.csv`, saves artwork under `uploads/`, **and**
-writes the lead into a SQLite database that powers the dashboard at `/dashboard/`.
-Needs PHP 8.0+ with `pdo_sqlite` (standard on any Namecheap VPS) and a working `mail()`.
-
-See [§2b — The leads dashboard](#2b-the-leads-dashboard) below.
-
-You can also point `BACKEND.url` at a Zapier or Make webhook, or a CRM endpoint — anything that
-accepts a JSON POST. The payload keys are the field `name` attributes plus `stage`, `lead_id`,
-`gclid`, the `utm_*` set, `page_url`, and `files[]` as `{name, type, data}` with base64 `data`.
+---
 
 <a id="2b-the-leads-dashboard"></a>
+
 ## 2b. The leads dashboard
 
-Every lead the form captures lands in a private dashboard at **`https://yourdomain.com/dashboard/`**.
-It is plain PHP + SQLite — no database server to install, no monthly fee, nothing to sign up for.
+At **`/dashboard`**. Everything under it requires signing in, including the CSV exports and the
+artwork downloads.
 
 ### What is in it
 
-- **Summary cards** — total leads, today, last 7 days, how many came from Google Ads,
-  how many completed the spec step, and how much won business you have logged.
-- **One row per enquiry.** Stage 1 (contact) creates the row, stage 2 (box specs + artwork)
-  fills the same row in, so you never see the same person twice.
-- **Details** opens the full record: box size, style, board, wrap, insert, finishing, needed-by
-  date, what they typed in the notes box, plus the full attribution trail
-  (GCLID, source, medium, campaign, keyword, ad content, landing page, IP).
-- **Status and value you can edit.** Move a lead through New → Contacted → Quoted → Won /
-  Lost / Spam and type in what the deal was worth. It saves the moment you change it.
-- **Your own notes** per lead — call outcome, quoted price, next step.
-- **Filters** — free-text search, status, date range, Google-Ads-only, has-specs.
-  Whatever you filter to is exactly what the downloads contain.
+- **Headline numbers** — all-time, today, last 7 days, how many came from Google Ads, how many
+  added specs, and won leads with their total value.
+- **Every lead** newest first, with contact details, quantity, source and campaign.
+- **Details** on any row: the full box spec, what they typed in the notes, downloadable artwork,
+  the whole campaign trail (gclid, gbraid/wbraid, source, medium, campaign, keyword, ad,
+  landing page, IP), and a notes field of your own.
+- **Status and value**, editable inline. Both feed the exports.
+- **Filters** — free-text search, status, date range, Google Ads only, has specs. The filters
+  live in the URL, so a filtered view is a link you can bookmark or send to a colleague, and
+  the export buttons carry the same filters.
 
 ### Signing in
 
-Go to `/dashboard/`. Out of the box **demo mode is on, so any username and password works** —
-`admin` / `boxes123` is the suggested pair.
+Out of the box `DASHBOARD_DEMO_MODE=true`, and **any username and password will sign in**. That
+is there so you can look at the dashboard before real accounts exist.
 
-**Turn demo mode off before you send real traffic.** In `dashboard/config.php` set
-`'demo_mode' => false` and add your own account:
+**Turn it off before the site takes live traffic.** These are real customers' names, emails and
+phone numbers:
 
 ```bash
-php -r 'echo password_hash("your-real-password", PASSWORD_DEFAULT), "\n";'
+# in .env
+DASHBOARD_DEMO_MODE=false
+DASHBOARD_USERNAME=admin
+DASHBOARD_PASSWORD=a-long-password-you-choose
+
+php artisan db:seed --force    # creates or updates that account
+php artisan config:cache
 ```
 
-Paste the hash it prints into the `users` array. Sessions time out after 4 hours idle.
+Sign-ins are rate limited to five attempts a minute per username and IP, so the dashboard cannot
+be quietly brute-forced.
 
 ### The three downloads
 
-| Button | What it is | What to do with it |
+Each file contains exactly the leads matching the filters on screen when you press the button.
+
+| Button | Format | Use it for |
 |---|---|---|
-| **Google Ads conversions (GCLID)** | One row per lead that arrived with a Google click ID | Google Ads → Goals → Conversions → **Uploads** → upload the file |
-| **Enhanced conversions for leads** | Email + phone, SHA-256 hashed and normalised exactly as Google specifies | Same upload screen — use this for leads with no GCLID |
-| **All lead data (plain CSV)** | Every field, human-readable | Excel, Google Sheets, or a CRM import |
+| **GCLID conversions** | `Parameters:TimeZone=…` line, then `Google Click ID, Conversion Name, Conversion Time, Conversion Value, Conversion Currency` | The main path. Google Ads › Tools & Settings › Conversions › **Uploads**. Only includes leads that carried a click id. |
+| **Enhanced conversions** | `Email, Phone Number, Conversion Name, …` with email and phone **SHA-256 hashed** | Leads with no click id. Hashing happens on your server, so no personal data leaves it in readable form. |
+| **Everything (CSV)** | every field held on the lead | Your CRM, or a spreadsheet. |
 
-Before downloading, check the four boxes above the buttons:
+The first two also stamp `exported_at` on the leads they contain, so you can see at a glance
+what has already gone to Google.
 
-- **Conversion action name** must match the name in Google Ads *character for character*
-  (Goals → Conversions → Summary). If it does not match, the upload is rejected.
-- **Time zone** must be your **Google Ads account's** time zone, not your server's. It is written
-  into the file's first line as `Parameters:TimeZone=…` and Google reads the timestamps against it.
-- **Currency** and **default value per lead**. A lead with its own value typed in overrides the
-  default — so mark your won deals with their real value, filter to `Won`, and upload that:
-  Smart Bidding then optimises for revenue instead of raw form fills.
+**The workflow that makes this worth doing:** mark leads that turned into real business as
+**won**, put the order value against them, then upload. That is what teaches Smart Bidding which
+clicks are worth paying for. Without it, Google optimises for form fills rather than revenue.
 
-Uploading these is what closes the loop. Without it Google only knows a form was submitted;
-with it Google learns which *keywords and audiences* actually produce paying customers.
+Two things Google rejects files over, both of which this handles for you: the conversion action
+name must match exactly (`ADS_CONVERSION_NAME`), and conversion times must be in the Google Ads
+account's time zone (`ADS_TIMEZONE`) — which is usually **not** your server's.
 
-### Deploying it to your Namecheap VPS
+---
 
-The dashboard is PHP, and **GitHub Pages cannot run PHP** — so the site needs to be served
-from your VPS (or any PHP host) for both the form handler and the dashboard to work.
+## 3. Deploying to your Namecheap VPS
+
+The app is served from `public/`, so the vhost root is **`/var/www/rigid/public`** — not the
+project folder. Pointing it at the project folder exposes `.env`; this is the single most
+important line in this section.
+
+### Requirements
+
+PHP **8.2+** with `pdo_sqlite` (or `pdo_mysql`), `mbstring`, `openssl`, `tokenizer`, `xml`,
+`ctype`, `json`, `fileinfo` · Composer · Node 18+ **for the build only** · nginx or Apache.
+
+### First deploy
 
 ```bash
-# on the VPS, as the web user
-cd /var/www/customboxesexperts.com          # your document root
-git clone -b claude/rigid-boxes-landing-page-at2dae \
-    https://github.com/saqibmalic/packaginglandingpage.git .
+sudo mkdir -p /var/www/rigid && sudo chown -R $USER:www-data /var/www/rigid
+cd /var/www/rigid
+git clone -b claude/rigid-boxes-landing-page-at2dae <repo-url> .
 
-# the app writes to these three; the web user must own them
-mkdir -p data uploads
-chown -R www-data:www-data data uploads
-chmod 750 data
+composer install --no-dev --optimize-autoloader
+npm ci && npm run build          # writes public/build — needed once per deploy
+
+cp .env.example .env
+php artisan key:generate
+nano .env                        # fill in section 1
+
+touch database/database.sqlite
+php artisan migrate --force
+php artisan db:seed --force      # creates the dashboard account
+
+# Laravel writes to these two; the web user must own them
+sudo chown -R www-data:www-data storage bootstrap/cache database
+sudo chmod -R 775 storage bootstrap/cache
+
+php artisan config:cache && php artisan route:cache && php artisan view:cache
 ```
 
-That is all the setup there is — the database file creates itself on the first lead.
-
-**Keep the lead data out of the web root.** `data/` ships with an `.htaccess` that denies
-access, but on nginx (which ignores `.htaccess`) point the app somewhere private instead:
+### nginx
 
 ```nginx
-# nginx: block the data directory outright
-location ^~ /data/ { deny all; return 404; }
+server {
+    listen 443 ssl http2;
+    server_name rigid.customboxesexperts.com;
+
+    # public/ — NOT /var/www/rigid
+    root /var/www/rigid/public;
+    index index.php;
+
+    client_max_body_size 24M;   # artwork uploads are capped at 20MB per file
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php8.2-fpm.sock;
+    }
+
+    location ~ /\.(?!well-known).* { deny all; }
+}
 ```
 
-or set `CBE_DATA_DIR=/var/lib/cbe-leads` in your PHP-FPM pool and the store follows it there.
+Then `sudo certbot --nginx -d rigid.customboxesexperts.com`.
 
-Back it up with a plain file copy — `data/leads.sqlite` *is* the whole database:
+Nothing else needs blocking: `.env`, `storage/` and the SQLite database all sit above the
+document root and are unreachable over HTTP by construction. Uploaded artwork lands in
+`storage/app/private/artwork/` and is served only through the authenticated
+`/dashboard/artwork/…` route, so nothing uploaded can be fetched, let alone executed.
+
+### Later deploys
 
 ```bash
-sqlite3 data/leads.sqlite ".backup '/root/backups/leads-$(date +%F).sqlite'"
+cd /var/www/rigid
+php artisan down
+git pull
+composer install --no-dev --optimize-autoloader
+npm ci && npm run build
+php artisan migrate --force
+php artisan config:cache && php artisan route:cache && php artisan view:cache
+php artisan up
 ```
+
+### Backups
+
+The whole lead history is one file. Copy it while the app is running — `.backup` takes a
+consistent snapshot even mid-write:
+
+```bash
+sqlite3 /var/www/rigid/database/database.sqlite ".backup '/root/backups/leads-$(date +%F).sqlite'"
+```
+
+Back up `storage/app/private/artwork/` alongside it — that is the customers' artwork.
 
 ### Testing after deploy
 
-Submit a real enquiry through your own form, then open `/dashboard/` — it should be at the top
-of the list within a second, tagged **Google Ads** if you clicked through an ad. Click
-**Details** to check the attribution came through, then delete it with **Delete lead**.
+1. Load the page over HTTPS with `?gclid=TEST123` on the URL.
+2. Submit the quote form. You should land on `/thank-you` with a reference shown.
+3. Check the alert email arrived. **If it did not, fix `MAIL_*` before spending on ads** — a
+   lead you never see is worse than no lead.
+4. Add box specs on the thank-you page. Confirm it stays **one row** in the dashboard.
+5. Sign in at `/dashboard`, confirm the lead is there with `TEST123` against it.
+6. Mark it won, give it a value, download the GCLID CSV, confirm the value appears.
+7. Delete the test lead.
 
-## 3. Testing it on a throwaway domain
+---
 
-The page is static, so with **Option A** the whole thing — including the form writing to your
-sheet — works on free hosting in a couple of minutes:
+## 4. Email deliverability
 
-| Host | How | Notes |
-|---|---|---|
-| **GitHub Pages** | Repo → Settings → Pages → Source: this branch, folder `/` | Fastest, the code is already pushed. URL: `https://<user>.github.io/PackagingLandingPage/` |
-| **Netlify Drop** | Drag the project folder onto [app.netlify.com/drop](https://app.netlify.com/drop) | No account needed to start, instant HTTPS URL |
-| **Cloudflare Pages** | Connect the repo, framework preset "None" | Free custom domains |
+Laravel sends through whatever `MAIL_*` describes. Two options:
 
-All three are static-only, so `submit-lead.php` will **not** run on them — use Option A for the
-test. Add `?gclid=TEST123&utm_campaign=test` to the URL when you try it, then confirm those
-values land in the sheet.
+- **SMTP on a mailbox you own** (`MAIL_MAILER=smtp`) — simplest, and what most Namecheap setups
+  already have. Use the real mailbox credentials for the domain.
+- **A transactional provider** (Postmark, SES, Resend) if alerts start landing in spam.
 
-Before pointing real ad spend at a test domain, note that the canonical tag and structured data
-still reference `customboxesexperts.com`. That is correct for production but means a test host is
-telling Google the real page lives elsewhere — fine for testing, wrong for a live campaign.
+Whichever you pick, `MAIL_FROM_ADDRESS` must be a real address **on your domain**. A From
+address the domain does not own fails SPF and DMARC, and lead alerts quietly stop arriving.
 
-## 4. Deployment
+Both alert emails set `Reply-To` to the buyer, so hitting reply in your inbox answers them
+directly.
 
-Recommended URL: `https://www.customboxesexperts.com/custom-rigid-boxes/`
-(a real subfolder on the main domain — inherits domain trust, keeps the ad destination on-brand).
+---
 
-Upload the files to that folder. The PHP handler needs PHP 7.4+ and a working `mail()` or SMTP
-setup; if your host blocks `mail()`, use Formspree, a CRM webhook or Zapier and set the form
-`action` to that endpoint instead.
+## Running it locally
 
-### Security — read this before enabling uploads
-
-**Move `leads.csv` outside the web root** if your host allows it — it is a plain-text backup of
-every lead. `robots.txt` blocks crawlers from it, but that is not access control.
-
-The artwork upload accepts `jpg, jpeg, png, pdf, ai, eps, zip` only, caps files at 5 × 20MB,
-discards the original filename in favour of a random one, and drops an `.htaccess` into
-`uploads/` that disables the PHP engine and denies direct access. That combination is what stops
-an upload form from becoming a way to run code on your server. If your host runs nginx (where
-`.htaccess` does nothing), move `$UPLOAD_DIR` outside the web root or add an nginx rule denying
-execution in that directory — otherwise disable the upload field.
-
-Add these to `.htaccess` for speed (Core Web Vitals feed into landing page experience):
-
-```apache
-<IfModule mod_deflate.c>
-  AddOutputFilterByType DEFLATE text/html text/css application/javascript image/svg+xml
-</IfModule>
-<IfModule mod_expires.c>
-  ExpiresActive On
-  ExpiresByType text/css "access plus 1 year"
-  ExpiresByType application/javascript "access plus 1 year"
-</IfModule>
+```bash
+composer install
+npm install
+cp .env.example .env && php artisan key:generate
+touch database/database.sqlite
+php artisan migrate --seed
+npm run dev          # in one terminal
+php artisan serve    # in another
 ```
+
+`MAIL_MAILER=log` by default locally, so alert emails land in `storage/logs/laravel.log` rather
+than being sent.
+
+**Tests:**
+
+```bash
+php artisan test
+```
+
+46 feature tests cover both form stages, the honeypot, the ad-click capture, the thank-you
+guard, uploads, sign-in and rate limiting, every dashboard filter, and all three CSV formats —
+including the SHA-256 hashes and the time zone conversion Google Ads is strict about.
 
 ---
 
@@ -284,7 +354,7 @@ The gallery holds **six rigid boxes, each with two shots**: a closed hero shot i
 open shot revealed by a "See it open" button in the lightbox. That second shot is the one that
 sells — nobody buys a rigid box for the outside.
 
-Drop your files into `assets/img/boxes/` using these names. The `.1` files follow your own
+Drop your files into `public/assets/img/boxes/` using these names. The `.1` files follow your own
 naming convention, so most of your photos only need the prefix added:
 
 | File | Export at | Aspect | Shown as | Which box |
@@ -319,7 +389,7 @@ for a 3000px file nobody sees.
 
 Box 1 is done — the Botanica lid-and-base shots are in place, closed in the grid and open in the
 lightbox. Captions for boxes 2–3 are written from your earlier photos. Boxes 4–6 are marked
-`REPLACE` in `index.html` — update the `data-caption` (shown in the lightbox) and the
+`REPLACE` in `resources/views/pages/landing.blade.php` — update the `data-caption` (shown in the lightbox) and the
 `<figcaption>` when you add them.
 
 **Why the mailers are in a separate labelled block.** Two of the six boxes you sent — Pelham and
@@ -343,7 +413,7 @@ are missing, the whole section disappears. Safe to publish at any stage.
 
 ### Videos — self-hosted, silent, autoplaying
 
-Two sections carry video, and both are built from files in `assets/video/`:
+Two sections carry video, and both are built from files in `public/assets/video/`:
 
 | Section | Files | Size on screen |
 |---|---|---|
@@ -351,8 +421,9 @@ Two sections carry video, and both are built from files in `assets/video/`:
 | **Folding-carton note** (below the gallery) | `carton-flower`, `carton-soap`, `carton-tart`, `carton-otriea` | 74px thumbnails |
 
 Each needs two files with the same stem: `name.mp4` (the clip) and `name.jpg` (the poster
-frame). To add one, encode it to match and copy the `<figure class="film">` block in
-`index.html`.
+frame). To add one, encode it to match and add a line to the `$film` array near the top of the
+film-wall section in `resources/views/pages/landing.blade.php` — the markup is generated from
+that array, so there is no block to copy.
 
 **Encoding recipe** — this is what the current clips were made with:
 
@@ -382,7 +453,7 @@ Keep each clip **under ~750KB**. All six together are 2.7MB, and a visitor who n
 past the hero downloads **none** of it.
 
 **How playback works.** No `<video>` has a `src` in the HTML — only `data-src`. An
-IntersectionObserver in `main.js` assigns the real URL when a tile is about to enter the
+IntersectionObserver in `resources/js/app.js` assigns the real URL when a tile is about to enter the
 viewport, plays it, and pauses it again when it leaves. So nothing competes with the LCP,
 off-screen clips do not drain a phone battery, and anyone whose OS asks for reduced motion gets
 the poster frame with a play button instead.
@@ -407,18 +478,17 @@ You asked about embedding Instagram. I'd advise against it *on this page* specif
 The video strip above does the same job with none of those costs: your content, curated, on your
 page, with the quote form still one tap away.
 
-**The Shorts strip.** Paste your own Shorts links into `SHORTS` at the top of
-`assets/js/main.js` — a full URL or a bare video ID, optionally followed by `| a caption`. Four
-to six is the sweet spot. Thumbnails come from YouTube automatically and nothing loads from
-youtube.com until a visitor clicks, so the tiles cost the page nothing. Leave the list empty and
-the section hides itself. Set `SHORTS_CHANNEL` to your channel's Shorts URL to show the "More on
-YouTube Shorts" line underneath; leave it empty and that line stays hidden rather than pointing
-at a dead link.
+**The Shorts strip.** Put your own Shorts links in `SITE_SHORTS` in `.env`, comma separated — a
+full URL or a bare video ID, each optionally followed by `| a caption`. Four to six is the sweet
+spot. Thumbnails come from YouTube automatically and nothing loads from youtube.com until a
+visitor clicks, so the tiles cost the page nothing. Leave it empty and the section hides itself.
+Set `SITE_SHORTS_CHANNEL` to your channel's Shorts URL to show the "More on YouTube Shorts" line
+underneath; leave it empty and that line stays hidden rather than pointing at a dead link.
 
 ## 6. Reviews
 
 The three `REPLACE —` testimonial cards need real, attributable quotes before you run traffic.
-Until they are filled in, `main.js` hides each placeholder card, and hides the whole reviews
+Until they are filled in, `resources/js/app.js` hides each placeholder card, and hides the whole reviews
 section if none of them are real yet — so nothing unfinished can reach a visitor.
 
 Google Ads prohibits fabricated testimonials, so use quotes you can actually stand behind: a
@@ -440,11 +510,12 @@ actions teaches the algorithm to chase whatever is easiest to trigger; two clean
 teach it to chase buyers.
 
 **1. Quote Form Submit — Primary (the money conversion).**
-Type: Website. It fires on **`thank-you.html`, on page load**, after Step 1 is saved — not on
+Type: Website. It fires on **`/thank-you`, on page load**, after Step 1 is saved — not on
 the button click. (Firing on click counts people who never actually submitted, and fires before
-the lead is even saved.) The page is already wired this way: `main.js` fires
-`gtag('event','conversion',{send_to: CONVERSIONS.lead})` on the thank-you page. Paste your real
-label into `CONVERSIONS.lead` in `assets/js/main.js`. Counting: **One**.
+the lead is even saved.) The page is already wired this way: the thank-you view fires
+`gtag('event','conversion',{send_to: …})` on load, and only when the lead that was just saved
+put the flag in the session — so a reload cannot double-count. Put your real label in
+`GOOGLE_ADS_LEAD_LABEL`. Counting: **One**.
 
 **2. Calls from ads — Primary.**
 This is a **Google Ads dashboard setting, not website code.** Turn on call reporting, add a
@@ -455,27 +526,28 @@ learns to ignore your best leads. Nothing to change on the site for this one.
 **3. Enhanced Conversions for leads.**
 The page hands Google the buyer's **email** on the thank-you page so Google can match the lead
 back to the ad click on your weekly upload. It is wired **two ways**, so it works however you tag:
-- **gtag (works today, no GTM needed):** `main.js` calls `gtag('set','user_data',{email})`
-  before the conversion. Google hashes the email in the browser — the raw value never leaves it.
-- **GTM (if you route through a container):** the email is also written into a hidden
-  `#ec-email` field and pushed to `dataLayer` as `lead_submitted.enhanced_conversion.email`.
-  In GTM, create a **User-Provided Data** variable → **Manual** → Email = that field (or the
-  dataLayer key) and enable Enhanced Conversions on the tag.
+- **gtag (works today, no GTM needed):** the thank-you page calls
+  `gtag('set','user_data',{email})` before the conversion, with the email rendered server-side
+  from the saved lead. Google hashes it in the browser — the raw value never leaves it.
+- **GTM (if you route through a container):** the same email is pushed to `dataLayer` as
+  `lead_submitted.enhanced_conversion.email`. In GTM, create a **User-Provided Data** variable →
+  **Manual** → Email = that dataLayer key, and enable Enhanced Conversions on the tag.
 Then turn Enhanced Conversions **on** in Google Ads (Conversion action → Settings → Enhanced
 conversions → Google tag / GTM).
 
 **4. GCLID capture.**
-Every form now has a hidden `gclid` field (plus `gbraid`, `wbraid` and the `utm_*` set),
-filled from the URL on load and written to your lead sheet next to the email and timestamp —
-that is the `GCLID` column in the Google Sheet. This is what lets you upload **offline
-conversions** later (which leads actually closed), so Google optimises toward revenue, not
-toward form-fills. Keep the sheet's `Timestamp`, `Email` and `GCLID` columns — the offline
-upload needs all three.
+`CaptureAdContext` middleware reads `gclid` (plus `gbraid`, `wbraid` and the `utm_*` set) from
+the landing URL, keeps it in the session for the rest of the visit, and stores it on the lead —
+server-side, so no ad blocker or script error can lose it. A 90-day cookie carries it for the
+visitor who clicks today and fills the form in next week. This is what lets you upload **offline
+conversions** later (which leads actually closed), so Google optimises toward revenue rather
+than form fills. The dashboard's GCLID export builds that file for you.
 
 Set a **value** on the Quote Form Submit action (e.g. margin × close-rate) once you have data;
 with values in place you can graduate from Maximize Conversions to **tROAS**.
 
-> The website also fires a click-to-call conversion on every `tel:` link (`CONVERSIONS.call`).
+> The website also fires a click-to-call conversion on every `tel:` link
+> (`GOOGLE_ADS_CALL_LABEL`).
 > That is a *different* action from "Calls from ads" above — mark this website-call action
 > **Secondary** so it doesn't compete with the forwarding-number call conversion.
 

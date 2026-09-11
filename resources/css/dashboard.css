@@ -1,0 +1,198 @@
+/* Leads dashboard — self-contained, no build step, no CDN. */
+
+:root{
+  --ink:#12211c; --ink-2:#4a5c55; --ink-3:#7b8c85;
+  --line:#e2e9e5; --bg:#f5f8f6; --card:#fff;
+  --brand:#0f6b4f; --brand-d:#0b5540; --mint:#e8f3ee;
+  --amber:#b4771a; --red:#b03030; --blue:#1d5fa8;
+  --r:12px; --shadow:0 1px 2px rgba(18,33,28,.06), 0 8px 24px rgba(18,33,28,.05);
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-text-size-adjust:100%}
+h1,h2,h3,h4{margin:0;line-height:1.25}
+a{color:var(--brand)}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px}
+.brk{word-break:break-all}
+
+/* ── Buttons ─────────────────────────────────────────────── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:10px 16px;border:1px solid transparent;border-radius:9px;
+  font:inherit;font-weight:600;line-height:1.2;text-decoration:none;cursor:pointer;
+  transition:background .15s,border-color .15s,color .15s}
+.btn--sm{padding:7px 11px;font-size:13px}
+.btn--block{width:100%}
+.btn--primary{background:var(--brand);color:#fff}
+.btn--primary:hover{background:var(--brand-d)}
+.btn--dark{background:var(--ink);color:#fff}
+.btn--dark:hover{background:#000}
+.btn--ghost{background:#fff;border-color:var(--line);color:var(--ink)}
+.btn--ghost:hover{border-color:var(--ink-3)}
+.btn--danger{background:#fff;border-color:#f0d4d4;color:var(--red)}
+.btn--danger:hover{background:#fdf2f2}
+
+input,select,textarea{font:inherit;color:var(--ink);background:#fff;
+  border:1px solid var(--line);border-radius:9px;padding:9px 11px;max-width:100%}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--brand);outline-offset:1px;border-color:var(--brand)}
+textarea{resize:vertical}
+
+/* ── Login ───────────────────────────────────────────────── */
+.login-body{display:flex;min-height:100vh;background:linear-gradient(160deg,#0f6b4f,#123f33 70%)}
+.login{margin:auto;padding:24px;width:100%;max-width:420px}
+.login__card{background:#fff;border-radius:16px;padding:28px 24px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.login__brand{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+.login__mark,.top__mark{display:grid;place-items:center;width:40px;height:40px;flex:none;
+  background:var(--brand);color:#fff;border-radius:10px;font-weight:800;letter-spacing:.5px}
+.login__brand strong,.top__brand strong{display:block;font-size:15px}
+.login__brand span,.top__brand span{display:block;color:var(--ink-3);font-size:13px}
+.login label{display:block;margin:14px 0 6px;font-weight:600;font-size:13px}
+.login input{width:100%}
+.login .btn{margin-top:20px}
+.login__demo{margin:18px 0 0;padding:12px 14px;background:var(--mint);border-radius:10px;
+  color:var(--ink-2);font-size:12.5px;line-height:1.6}
+.login__demo code{background:#fff;padding:1px 5px;border-radius:4px;font-size:12px}
+.alert{margin:0 0 4px;padding:10px 12px;border-radius:9px;font-size:13.5px}
+.alert--bad{background:#fdf2f2;color:var(--red)}
+
+/* ── Chrome ──────────────────────────────────────────────── */
+.top{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.top__in{max-width:1280px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;
+  justify-content:space-between;gap:16px;flex-wrap:wrap}
+.top__brand{display:flex;align-items:center;gap:11px}
+.top__right{display:flex;align-items:center;gap:12px}
+.top__user{color:var(--ink-3);font-size:13px}
+.wrap{max-width:1280px;margin:0 auto;padding:22px 20px 60px}
+
+/* ── Stat cards ──────────────────────────────────────────── */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:22px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:14px 16px;box-shadow:var(--shadow)}
+.card__n{display:block;font-size:26px;font-weight:800;letter-spacing:-.02em}
+.card__l{display:block;margin-top:2px;color:var(--ink-3);font-size:12.5px}
+.card--win{background:var(--mint);border-color:#cde5da}
+.card--win .card__n{color:var(--brand)}
+
+/* ── Export panel ────────────────────────────────────────── */
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:20px;margin-bottom:22px;box-shadow:var(--shadow)}
+.panel__h{font-size:17px}
+.panel__p{margin:6px 0 16px;color:var(--ink-2);font-size:13.5px;max-width:70ch}
+.export__grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.export__grid label{display:flex;flex-direction:column;gap:5px;font-size:12.5px;
+  font-weight:600;color:var(--ink-2)}
+.export__grid input,.export__grid select{width:100%;font-weight:400}
+.export__btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.export__note{margin:12px 0 0;color:var(--ink-3);font-size:12.5px;line-height:1.65;max-width:80ch}
+
+/* ── Filters ─────────────────────────────────────────────── */
+.filters{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:14px}
+.filters input[type=search]{flex:1 1 240px;min-width:0}
+.filters__date{display:flex;align-items:center;gap:6px;color:var(--ink-3);font-size:13px}
+.filters__check{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);
+  border-radius:9px;padding:9px 12px;font-size:13px;cursor:pointer}
+.count{margin:0 0 10px;color:var(--ink-3);font-size:13px}
+
+/* ── Table ───────────────────────────────────────────────── */
+.tablewrap{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  overflow-x:auto;box-shadow:var(--shadow)}
+.leads{width:100%;border-collapse:collapse;min-width:860px}
+.leads th{text-align:left;padding:11px 14px;background:#fafcfb;border-bottom:1px solid var(--line);
+  color:var(--ink-3);font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.leads td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+.lead:hover{background:#fafcfb}
+.when{display:block;font-size:13px}
+.lid{display:block;margin-top:2px;color:var(--ink-3);font-size:11.5px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.nm{display:block}
+.lnk{display:block;font-size:13px;text-decoration:none;word-break:break-word}
+.lnk:hover{text-decoration:underline}
+.sub{display:block;margin-top:3px;color:var(--ink-3);font-size:12px}
+.tag{display:inline-block;padding:2px 8px;border-radius:99px;background:var(--mint);
+  color:var(--brand);font-size:11.5px;font-weight:600}
+.tag--ads{background:#e6effa;color:var(--blue)}
+.tag--dim{background:#f0f2f1;color:var(--ink-3)}
+.tag--spec{margin-top:4px;background:#fdf3e2;color:var(--amber)}
+.status{padding:6px 9px;font-size:13px}
+.status--new{border-color:#bcd8ff;background:#f2f7ff}
+.status--won{border-color:#b6dcc9;background:var(--mint);color:var(--brand);font-weight:600}
+.status--lost,.status--spam{color:var(--ink-3);background:#f7f8f8}
+.val{width:88px}
+.row-actions{text-align:right;white-space:nowrap}
+
+/* ── Detail row ──────────────────────────────────────────── */
+.detail td{background:#fafcfb;padding:0}
+.detail__grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:24px;padding:18px 14px}
+.detail h4{margin:0 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3)}
+.detail h4+h4,.detail dl+h4,.detail p+h4{margin-top:18px}
+.detail dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:0;font-size:13px}
+.detail dt{color:var(--ink-3)}
+.detail dd{margin:0}
+.quote{margin:0;padding:10px 12px;background:#fff;border:1px solid var(--line);
+  border-radius:9px;font-size:13px}
+.notes{width:100%}
+.detail__btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.saved{margin:8px 0 0;color:var(--brand);font-size:12.5px;font-weight:600}
+
+/* ── Empty + pager ───────────────────────────────────────── */
+.empty{background:var(--card);border:1px dashed var(--line);border-radius:var(--r);
+  padding:44px 24px;text-align:center}
+.empty h3{font-size:17px}
+.empty p{margin:8px auto 0;max-width:46ch;color:var(--ink-3);font-size:13.5px}
+.pager{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:18px;
+  color:var(--ink-3);font-size:13px}
+
+/* ── Phone and tablet: the table becomes a stack of cards ──
+   Seven columns never fit comfortably below ~900px, so rather than force a
+   sideways scroll each lead is rendered as its own card. */
+@media (max-width:900px){
+  .wrap{padding:16px 14px 48px}
+  .top__in{padding:10px 14px}
+  .cards{grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px}
+  .card__n{font-size:22px}
+  /* Filter bar as a two-column grid — nothing collides at 320px. */
+  .filters{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .filters input[type=search],.filters>select,.filters>.btn{grid-column:1/-1;width:100%}
+  .filters__date{flex-direction:column;align-items:stretch;gap:3px;
+    font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+  .filters__date input{width:100%}
+
+  .tablewrap{background:none;border:0;box-shadow:none;overflow:visible}
+  .leads,.leads tbody,.leads tr,.leads td{display:block;width:auto}
+  .leads{min-width:0}
+  .leads thead{display:none}
+  .lead{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+    padding:6px 4px;margin-bottom:10px;box-shadow:var(--shadow)}
+  /* Label in column one, every value stacked under itself in column two. */
+  .lead td{border:0;padding:8px 12px;display:grid;
+    grid-template-columns:84px minmax(0,1fr);gap:3px 12px;align-items:start}
+  .lead td::before{content:attr(data-th);grid-column:1;grid-row:1;color:var(--ink-3);
+    font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding-top:3px}
+  .lead td>*{grid-column:2;justify-self:start}
+  .lead .tag{margin-top:0}
+  .row-actions{grid-template-columns:1fr}
+  .row-actions::before{content:none}
+  .row-actions>*{grid-column:1;justify-self:end}
+  .detail{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+    margin:-6px 0 10px}
+  .detail td{padding:0;display:block}
+  .detail__grid{grid-template-columns:1fr;gap:18px;padding:14px}
+}
+
+/* ── Additions for the Livewire rebuild ────────────────────── */
+/* Livewire re-renders the list in place, so these cover states the
+   hand-rolled version had no way to show. */
+.count__busy{color:var(--brand);font-weight:600}
+.login__remember{display:flex;align-items:center;gap:8px;margin:16px 0 0;font-size:13px;color:var(--ink-2)}
+.login__remember input{width:auto}
+.files{margin:0;padding-left:18px;font-size:13px}
+.files li{margin-bottom:5px;word-break:break-word}
+.files .sub{display:inline;margin-left:6px}
+.pager__in{display:flex;align-items:center;justify-content:center;gap:14px}
+.pager__btn{padding:7px 13px;border:1px solid var(--line);border-radius:9px;background:#fff;
+  color:var(--ink);font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.pager__btn:hover:not(.is-off){border-color:var(--ink-3)}
+.pager__btn.is-off{color:var(--ink-3);cursor:default;background:#f7f8f8}
+.pager__at{color:var(--ink-3);font-size:13px}
