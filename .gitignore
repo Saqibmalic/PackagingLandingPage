@@ -33,3 +33,8 @@ Thumbs.db
 *.sqlite-wal
 *.sqlite-shm
 leads.csv
+/public/error_log
+.htaccess
+package-lock.json
+/yarn.lock
+composer.lock

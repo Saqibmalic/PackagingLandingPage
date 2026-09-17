@@ -26,6 +26,13 @@
     });
   </script>
 @endif
+<script>
+  gtag('event', 'conversion', {
+      'send_to': 'AW-7199731108/i9uqCKTbjOkaEOnb06g9',
+      'value': 1.0,
+      'currency': 'USD'
+  });
+</script>
 @endsection
 
 @section('body')
