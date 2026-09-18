@@ -1,0 +1,68 @@
+# Runs on every push and every pull request. Nothing here touches the live
+# site — this job only answers "would this break anything?"
+
+name: Tests
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  # Lets the deploy workflow run this suite as a gate before it ships.
+  workflow_call:
+
+jobs:
+  test:
+    name: PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # 8.3 is the floor composer.json allows and what the Namecheap
+        # account should be set to; 8.4 is here so an upgrade on the server
+        # cannot surprise us later.
+        php: ['8.3', '8.4']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, sqlite3, pdo_sqlite, intl, zip, gd
+          coverage: none
+
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache
+          key: composer-${{ matrix.php }}-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-${{ matrix.php }}-
+
+      - name: Install PHP dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Prepare the environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Build the front-end
+        run: |
+          npm ci
+          npm run build
+
+      - name: Run the test suite
+        run: php artisan test
+
+      - name: Check code style
+        # Scope and exclusions live in pint.json, so this matches exactly what
+        # `./vendor/bin/pint` does on a developer's machine.
+        run: ./vendor/bin/pint --test

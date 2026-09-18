@@ -1,0 +1,114 @@
+# Deploys main to offers.customboxesexperts.com.
+#
+# Everything is built here, in CI, and the finished result is rsynced to the
+# server. That means the Namecheap account needs no Composer, no Node, no git
+# and no GitHub credentials — only PHP and SSH. Fewer moving parts on shared
+# hosting, and nothing on the server to keep in sync with this repo.
+#
+# It waits for the test suite to pass first: a red build never reaches a page
+# that is taking paid traffic.
+
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  # Lets you re-run a deploy from the Actions tab without pushing a commit.
+  workflow_dispatch:
+
+# A second push while a deploy is running queues rather than racing it, so two
+# rsyncs can never interleave over the same directory.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  test:
+    uses: ./.github/workflows/ci.yml
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, sqlite3, pdo_sqlite, intl, zip, gd
+          coverage: none
+
+      - name: Install PHP dependencies for production
+        # --no-dev drops PHPUnit, Pint and friends. They have no business on a
+        # public server and they are a third of the vendor directory.
+        run: composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Build the front-end
+        run: |
+          npm ci
+          npm run build
+
+      - name: Add the server to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p "${{ secrets.SSH_PORT || 22 }}" -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Load the deploy key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Upload the built application
+        # --delete keeps the server from accumulating files we have since
+        # removed. Every exclude below is there to survive that flag:
+        #
+        #   .env                  the server's own credentials, never ours
+        #   storage/              logs, sessions, caches AND customer artwork
+        #   *.sqlite              the leads database — deleting it loses leads
+        #   public/artwork        anything served from a lead's uploads
+        #
+        # If you ever edit this list, treat storage/ and *.sqlite as load
+        # bearing. Removing them turns a routine deploy into data loss.
+        run: |
+          rsync -az --delete --no-perms --no-owner --no-group \
+            -e "ssh -p ${{ secrets.SSH_PORT || 22 }} -o StrictHostKeyChecking=yes" \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='.env' \
+            --exclude='storage/' \
+            --exclude='*.sqlite' \
+            --exclude='*.sqlite-wal' \
+            --exclude='*.sqlite-shm' \
+            --exclude='public/artwork' \
+            --exclude='public/storage' \
+            --exclude='node_modules' \
+            --exclude='tests' \
+            ./ "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.DEPLOY_PATH }}/"
+
+      - name: Migrate and warm the caches
+        # set -e so a failed migration fails the deploy loudly instead of
+        # leaving a half-updated site reporting success.
+        run: |
+          ssh -p "${{ secrets.SSH_PORT || 22 }}" "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" bash -euo pipefail <<REMOTE
+          cd "${{ secrets.DEPLOY_PATH }}"
+          php artisan migrate --force --no-interaction
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+          php artisan storage:link || true
+          REMOTE
+
+      - name: Check the site is answering
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' --retry 3 --retry-delay 5 https://offers.customboxesexperts.com/)
+          echo "Home page returned $code"
+          test "$code" = "200"

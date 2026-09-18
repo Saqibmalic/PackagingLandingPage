@@ -43,7 +43,7 @@ resources/
 public/assets/          photos and video (see section 5)
 public/umrah/           an unrelated static microsite, served as-is
 database/migrations/    users (+ username) and leads
-tests/Feature/          46 tests covering the whole flow
+tests/Feature/          51 tests covering the whole flow
 ```
 
 ---
@@ -197,7 +197,10 @@ account's time zone (`ADS_TIMEZONE`) — which is usually **not** your server's.
 
 ---
 
-## 3. Deploying to your Namecheap VPS
+## 3. Deploying by hand (VPS / nginx)
+
+> Running on **cPanel shared hosting with automatic deploys from GitHub**? That is section
+> **3b** — skip this one. This section is the manual route, kept for a self-managed VPS.
 
 The app is served from `public/`, so the vhost root is **`/var/www/rigid/public`** — not the
 project folder. Pointing it at the project folder exposes `.env`; this is the single most
@@ -205,8 +208,8 @@ important line in this section.
 
 ### Requirements
 
-PHP **8.2+** with `pdo_sqlite` (or `pdo_mysql`), `mbstring`, `openssl`, `tokenizer`, `xml`,
-`ctype`, `json`, `fileinfo` · Composer · Node 18+ **for the build only** · nginx or Apache.
+PHP **8.3+** (required by `composer.json`) with `pdo_sqlite` (or `pdo_mysql`), `mbstring`, `openssl`, `tokenizer`, `xml`,
+`ctype`, `json`, `fileinfo` · Composer · Node 20+ **for the build only** · nginx or Apache.
 
 ### First deploy
 
@@ -303,6 +306,114 @@ Back up `storage/app/private/artwork/` alongside it — that is the customers' a
 
 ---
 
+## 3b. Automatic deploys from GitHub (cPanel + SSH)
+
+Push to `main` → GitHub runs the tests → if they pass, the built site is uploaded to
+`offers.customboxesexperts.com`. If the tests fail, nothing is uploaded.
+
+Everything is built **in GitHub Actions**, not on the server: `composer install`, `npm run
+build`, all of it. The Namecheap account therefore needs no Composer, no Node, no git, and no
+GitHub credentials — only PHP and SSH. That is deliberate. Shared hosting is the worst place
+to debug a toolchain.
+
+### The one thing that must be right: the document root
+
+cPanel's default for a subdomain is `/home/<user>/public_html/offers`, and **that is the wrong
+place for this app.** Everything in the project folder would be downloadable, including `.env`
+— your database password, mail password and `APP_KEY`.
+
+Put the application *outside* the web root and point the subdomain at its `public/` folder:
+
+```text
+/home/<user>/apps/offers/          ← the application (not web-reachable)
+/home/<user>/apps/offers/public/   ← the document root the subdomain points at
+```
+
+In cPanel → **Domains** → `offers.customboxesexperts.com` → edit the document root to
+`/home/<user>/apps/offers/public`. If cPanel refuses to point outside `public_html`, say so —
+there is a symlink workaround, but try this first because it is much cleaner.
+
+Verify before going further: `https://offers.customboxesexperts.com/.env` must return **404**.
+If it shows a page of settings, stop and fix the document root.
+
+### One-time server setup
+
+Over SSH, from cPanel → Terminal:
+
+```bash
+mkdir -p ~/apps/offers && cd ~/apps/offers
+
+# PHP 8.3+ is required (composer.json). Set it in cPanel → MultiPHP Manager
+# for this subdomain, then confirm the CLI matches:
+php -v
+
+# The .env lives only on the server and is never deployed or overwritten.
+nano .env                      # paste the values from section 1
+php artisan key:generate
+
+touch database/database.sqlite
+php artisan migrate --force
+php artisan db:seed --force    # dashboard login
+chmod -R 775 storage bootstrap/cache database
+```
+
+### One-time GitHub setup
+
+Generate a deploy key **on the server**, so the private half never leaves it:
+
+```bash
+ssh-keygen -t ed25519 -f ~/.ssh/github_deploy -N ""
+cat ~/.ssh/github_deploy.pub >> ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
+cat ~/.ssh/github_deploy          # the private key — copy this
+```
+
+Then in GitHub → **Settings → Secrets and variables → Actions → New repository secret**:
+
+| Secret | Value |
+|---|---|
+| `SSH_HOST` | your server's hostname or IP (`199.192.27.137`) |
+| `SSH_USER` | your cPanel username |
+| `SSH_PRIVATE_KEY` | the whole `github_deploy` output, `BEGIN`/`END` lines included |
+| `DEPLOY_PATH` | `/home/<user>/apps/offers` |
+| `SSH_PORT` | only if your host uses a non-standard port; otherwise skip it |
+
+Paste these into GitHub directly. Never put them in a file in this repo, and never send them
+over chat or email — a deploy key is a login to your server.
+
+### What a deploy does
+
+`.github/workflows/deploy.yml`, in order: run the suite on PHP 8.3 and 8.4 → `composer install
+--no-dev` → `npm run build` → rsync to the server → `migrate` → cache config, routes and views
+→ check the home page returns 200.
+
+The rsync uses `--delete` so the server cannot accumulate files you have deleted here. Four
+paths are excluded from that, and they are load-bearing:
+
+| Excluded | Why |
+|---|---|
+| `.env` | the server's own credentials — ours must never overwrite them |
+| `storage/` | logs, sessions, **and customer artwork** |
+| `*.sqlite` | the leads database. Deleting it loses every lead |
+| `public/artwork`, `public/storage` | anything served from a lead's uploads |
+
+If you ever edit that exclude list, treat `storage/` and `*.sqlite` as untouchable. Removing
+them turns a routine deploy into data loss.
+
+### Rolling back
+
+Deploys are just your git history, so reverting is a normal push:
+
+```bash
+git revert <bad-commit>
+git push origin main
+```
+
+That runs the tests and redeploys the previous state. Avoid `git push --force` to `main` — it
+works, but it rewrites the history the rollback depends on.
+
+---
+
 ## 4. Email deliverability
 
 Laravel sends through whatever `MAIL_*` describes. Two options:
@@ -321,18 +432,39 @@ directly.
 
 ## Running it locally
 
+The normal working loop is: change it here, look at it at `localhost`, run the tests, then
+push. Pushing to `main` deploys (section 3b), so `localhost` is where mistakes are cheap.
+
+You need **PHP 8.3 or newer** (`composer.json` requires it), Composer, and Node 20+.
+
 ```bash
 composer install
 npm install
 cp .env.example .env && php artisan key:generate
 touch database/database.sqlite
 php artisan migrate --seed
-npm run dev          # in one terminal
-php artisan serve    # in another
+npm run dev          # in one terminal — rebuilds CSS/JS as you edit
+php artisan serve    # in another — then open http://127.0.0.1:8000
 ```
 
-`MAIL_MAILER=log` by default locally, so alert emails land in `storage/logs/laravel.log` rather
-than being sent.
+Sign in to the dashboard at `/dashboard` with `admin` / `boxes123`.
+
+Two things are deliberately different locally, so you can work without side effects:
+
+- `MAIL_MAILER=log` — alert emails are written to `storage/logs/laravel.log` instead of being
+  sent, so testing the form does not mail your sales inbox.
+- `GOOGLE_ADS_ID` is empty in `.env.example`, so **no tracking tag renders locally**. Test
+  submissions cannot reach the live Google Ads account or pollute your conversion data.
+
+### Before you push
+
+```bash
+php artisan test              # the full suite
+./vendor/bin/pint             # formats the code the way CI expects
+```
+
+GitHub runs both of these on every push anyway, and a failing suite blocks the deploy — but
+catching it here takes seconds instead of minutes.
 
 **Tests:**
 
@@ -340,7 +472,7 @@ than being sent.
 php artisan test
 ```
 
-46 feature tests cover both form stages, the honeypot, the ad-click capture, the thank-you
+51 feature tests cover both form stages, the honeypot, the ad-click capture, the thank-you
 guard, uploads, sign-in and rate limiting, every dashboard filter, and all three CSV formats —
 including the SHA-256 hashes and the time zone conversion Google Ads is strict about.
 
