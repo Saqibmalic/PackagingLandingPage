@@ -33,3 +33,12 @@ Thumbs.db
 *.sqlite-wal
 *.sqlite-shm
 leads.csv
+/public/error_log
+/yarn.lock
+
+# composer.lock, package-lock.json and public/.htaccess are deliberately
+# tracked, not ignored. The lockfiles are what make `composer install` and
+# `npm ci` install the same versions on the server as were tested here —
+# without them a deploy silently becomes an upgrade. public/.htaccess is
+# what gives Apache its rewrite rules; lose it and every URL except / is
+# a 404. Ignore a server's own stray .htaccess by path if one appears.
