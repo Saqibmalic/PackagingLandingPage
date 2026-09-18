@@ -32,5 +32,11 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <!-- Never let a test run send hits to the live Google Ads account.
+             Tests that need a tag set these themselves. -->
+        <env name="GOOGLE_ADS_ID" value=""/>
+        <env name="GA4_MEASUREMENT_ID" value=""/>
+        <env name="GOOGLE_ADS_LEAD_LABEL" value=""/>
+        <env name="GOOGLE_ADS_CALL_LABEL" value=""/>
     </php>
 </phpunit>

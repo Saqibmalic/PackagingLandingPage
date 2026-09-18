@@ -92,4 +92,49 @@ class FullFlowTest extends TestCase
             ->assertOk()
             ->assertDontSee('googletagmanager.com', false);
     }
+
+    #[Test]
+    public function the_google_tag_loads_on_every_public_page(): void
+    {
+        // Google's instruction is "every page of your website". The legal
+        // pages extend the site layout, so one include covers all of them —
+        // this proves it, rather than trusting that it still does.
+        config(['tracking.ads_id' => 'AW-16459820521']);
+
+        foreach (['/', '/privacy-policy', '/terms'] as $path) {
+            $this->get($path)
+                ->assertOk()
+                ->assertSee('googletagmanager.com/gtag/js?id=AW-16459820521', false)
+                ->assertSee("gtag('config', \"AW-16459820521\")", false);
+        }
+    }
+
+    #[Test]
+    public function the_google_tag_is_the_first_thing_the_head_loads(): void
+    {
+        config(['tracking.ads_id' => 'AW-16459820521']);
+
+        $html = $this->get('/')->assertOk()->getContent();
+
+        $charset = strpos($html, '<meta charset');
+        $tag = strpos($html, 'googletagmanager.com');
+        $fonts = strpos($html, 'fonts.googleapis.com');
+
+        // Charset stays inside the first 1024 bytes the HTML spec allows for
+        // it, and the tag still beats every other resource on the page.
+        $this->assertLessThan(1024, $charset);
+        $this->assertLessThan($fonts, $tag);
+    }
+
+    #[Test]
+    public function the_dashboard_is_left_out_of_the_ads_tag(): void
+    {
+        // Sales staff opening leads all day would otherwise register as
+        // traffic and skew the conversion rate the bidding runs on.
+        config(['tracking.ads_id' => 'AW-16459820521']);
+
+        $this->get(route('dashboard.login'))
+            ->assertOk()
+            ->assertDontSee('googletagmanager.com', false);
+    }
 }

@@ -3,6 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+{{-- Google asks for the tag "immediately after the <head> element", and the
+     reason is real: the sooner gtag.js is requested, the fewer visitors who
+     bounce early go uncounted. It sits just below charset rather than above
+     it because the HTML spec wants the encoding declared in the first 1024
+     bytes, and a script tag ahead of it eats into that budget. Two meta tags
+     cost ~100 bytes and the tag is still the first thing that loads. --}}
+@include('partials.tracking')
 <title>@yield('title', 'Custom Rigid Boxes | Custom Boxes Experts')</title>
 <meta name="description" content="@yield('description')">
 @hasSection('canonical')
@@ -22,7 +29,6 @@
 @vite(['resources/css/app.css', 'resources/js/app.js'])
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%231A3163'/><path d='M16 6l8 4.6v9.2L16 24.4 8 19.8v-9.2z' fill='none' stroke='%23F2A65A' stroke-width='2'/><rect x='12.5' y='12.5' width='7' height='7' rx='1.5' fill='%23F2A65A'/></svg>">
 
-@include('partials.tracking')
 @yield('head')
 </head>
 <body @yield('body-attributes')>
