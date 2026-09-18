@@ -3,13 +3,6 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-{{-- Google asks for the tag "immediately after the <head> element", and the
-     reason is real: the sooner gtag.js is requested, the fewer visitors who
-     bounce early go uncounted. It sits just below charset rather than above
-     it because the HTML spec wants the encoding declared in the first 1024
-     bytes, and a script tag ahead of it eats into that budget. Two meta tags
-     cost ~100 bytes and the tag is still the first thing that loads. --}}
-@include('partials.tracking')
 <title>@yield('title', 'Custom Rigid Boxes | Custom Boxes Experts')</title>
 <meta name="description" content="@yield('description')">
 @hasSection('canonical')
@@ -36,5 +29,31 @@
 @yield('body')
 
 @livewireScripts
+<!-- Start of Zendesk Widget script (Deferred for Performance) -->
+<script>
+    // Defer Zendesk widget until after page load or user interaction
+    function loadZendesk() {
+        if (window.zendeskLoaded) return;
+        window.zendeskLoaded = true;
+
+        var script = document.createElement('script');
+        script.id = 'ze-snippet';
+        script.src = 'https://static.zdassets.com/ekr/snippet.js?key=33aefcc6-f282-4500-92b1-189b2fa9efcb';
+        script.async = true;
+        document.body.appendChild(script);
+    }
+
+    // Load on interaction or after 5 seconds (whichever comes first)
+    var events = ['mousedown', 'touchstart', 'scroll', 'keydown'];
+    var timeout = setTimeout(loadZendesk, 5000);
+
+    events.forEach(function(event) {
+        window.addEventListener(event, function() {
+            clearTimeout(timeout);
+            loadZendesk();
+        }, { once: true, passive: true });
+    });
+</script>
+<!-- End of Zendesk Widget script -->
 </body>
 </html>
