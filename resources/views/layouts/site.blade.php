@@ -3,6 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+{{-- Google asks for the tag "immediately after the <head> element", and the
+     reason is real: the sooner gtag.js is requested, the fewer visitors who
+     bounce early go uncounted. It sits just below charset rather than above
+     it because the HTML spec wants the encoding declared in the first 1024
+     bytes, and a script tag ahead of it eats into that budget. Two meta tags
+     cost ~100 bytes and the tag is still the first thing that loads. --}}
+@include('partials.tracking')
 <title>@yield('title', 'Custom Rigid Boxes | Custom Boxes Experts')</title>
 <meta name="description" content="@yield('description')">
 @hasSection('canonical')
