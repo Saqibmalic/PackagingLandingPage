@@ -36,5 +36,31 @@
 @yield('body')
 
 @livewireScripts
+<!-- Start of Zendesk Widget script (Deferred for Performance) -->
+<script>
+    // Defer Zendesk widget until after page load or user interaction
+    function loadZendesk() {
+        if (window.zendeskLoaded) return;
+        window.zendeskLoaded = true;
+
+        var script = document.createElement('script');
+        script.id = 'ze-snippet';
+        script.src = 'https://static.zdassets.com/ekr/snippet.js?key=33aefcc6-f282-4500-92b1-189b2fa9efcb';
+        script.async = true;
+        document.body.appendChild(script);
+    }
+
+    // Load on interaction or after 5 seconds (whichever comes first)
+    var events = ['mousedown', 'touchstart', 'scroll', 'keydown'];
+    var timeout = setTimeout(loadZendesk, 5000);
+
+    events.forEach(function(event) {
+        window.addEventListener(event, function() {
+            clearTimeout(timeout);
+            loadZendesk();
+        }, { once: true, passive: true });
+    });
+</script>
+<!-- End of Zendesk Widget script -->
 </body>
 </html>
