@@ -93,7 +93,7 @@ Everything below is `.env`. No code changes.
 |---|---|
 | `APP_URL` | `https://your-subdomain.customboxesexperts.com` |
 | `APP_ENV` / `APP_DEBUG` | `production` / `false` — **never ship with debug on** |
-| `GOOGLE_ADS_ID` | **Set** — `AW-16459820521`. The base Google tag; it alone records no conversions |
+| `GOOGLE_ADS_ID` | `AW-16459820521` on the **server only**. Empty in `.env.example` so local work is never counted. The base tag alone records no conversions |
 | `GOOGLE_ADS_LEAD_LABEL` | `AW-XXXXXXXXXX/AbCdEfGh` — the "Quote Form Submit" action |
 | `GOOGLE_ADS_CALL_LABEL` | the click-to-call action (mark it **secondary** in Google Ads) |
 | `GA4_MEASUREMENT_ID` | `G-XXXXXXXXXX`, optional but recommended |
