@@ -20,7 +20,7 @@ class QuoteFormTest extends TestCase
     {
         $this->get('/')
             ->assertOk()
-            ->assertSee('Custom Rigid Boxes That Feel Like the Brand')
+            ->assertSee('Custom Printed Rigid Boxes That Feel Like the Brand')
             ->assertSee('Get your free 3D mockup')
             ->assertSee('Get My Free Quote &amp; 3D Mockup', false);
     }

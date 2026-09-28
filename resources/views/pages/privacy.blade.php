@@ -14,7 +14,7 @@
         <p>Custom Boxes Experts, 1227 Solano Ave #9, Albany, CA 94706, USA.
         Phone <a href="tel:{{ config('site.phone_e164') }}">(888) 716-1078</a>, email
         <a href="mailto:{{ config('site.email') }}">info@customboxesexperts.com</a>. We manufacture custom rigid and
-        printed packaging for businesses in the United States and Canada.</p>
+        printed packaging for businesses in the United States.</p>
 
         <h2>Information we collect</h2>
         <h3>Information you give us</h3>

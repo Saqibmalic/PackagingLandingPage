@@ -719,14 +719,15 @@ Every headline below has a matching on-page proof point — that alignment is wh
 landing page experience component of Quality Score.
 
 - `Custom Rigid Boxes — Free 3D Mockup`
-- `Quote in 1 Hour · 100 Box Minimum`
+- `Quote in 1 Hour · 50 Box Minimum`
 - `No Die or Plate Charges — Ever`
-- `Free Shipping USA & Canada`
+- `Free Shipping Across the USA`
+- `Rigid Boxes Wholesale — Direct`
 - `Sample Approved Before We Print`
 - `Magnetic, Drawer & Shoulder Neck`
 
 Sitelinks: Box Styles (`#styles`), Materials & Finishes (`#specs`), How It Works (`#process`),
-Pricing (`#pricing`).
+Pricing (`#pricing`), Wholesale (`#wholesale`).
 Callouts: Free 3D Mockup · No Setup Fees · Pre-Production Sample · US-Based Support · FSC® Stocks.
 Structured snippet (Types): Magnetic Closure, Drawer, Shoulder Neck, Book Style, Telescoping, Rigid Mailer.
 Add a **call extension** with (888) 716-1078 and a **lead form asset** as a backup capture path.

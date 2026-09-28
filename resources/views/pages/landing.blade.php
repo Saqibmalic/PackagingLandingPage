@@ -1,13 +1,13 @@
 @extends('layouts.site')
 
-@section('title', 'Custom Rigid Boxes | Free 3D Mockup & Quote in 1 Hour | Custom Boxes Experts')
-@section('description', 'Custom rigid boxes made to spec — magnetic closure, drawer, shoulder neck & book style. 2mm–3mm greyboard, foil, emboss, soft-touch. Free 3D mockup, quote in 1 hour, free US shipping, 100 unit minimum.')
+@section('title', 'Custom Rigid Boxes Wholesale | Rigid Box Manufacturer | Free 3D Mockup & Quote in 1 Hour')
+@section('description', 'Rigid box manufacturer and supplier — custom printed rigid boxes in magnetic closure, drawer, shoulder neck & book style. 2mm–3mm greyboard, foil, emboss, soft-touch. Rigid boxes wholesale from 500 units. Free 3D mockup, quote in 1 hour, free US shipping, 50 unit minimum.')
 @section('canonical', config('site.canonical'))
 
 @section('meta')
 <meta property="og:type" content="website">
-<meta property="og:title" content="Custom Rigid Boxes — Free 3D Mockup &amp; Quote in 1 Hour">
-<meta property="og:description" content="Luxury rigid setup boxes for beauty, spirits, tech and jewelry brands. 100 unit minimum, free design support, free US shipping.">
+<meta property="og:title" content="Custom Rigid Boxes Wholesale — Free 3D Mockup &amp; Quote in 1 Hour">
+<meta property="og:description" content="Luxury rigid setup boxes for beauty, spirits, tech and jewelry brands. 50 unit minimum, wholesale pricing from 500 units, free design support, free US shipping.">
 <meta property="og:url" content="{{ config('site.canonical') }}">
 <meta property="og:site_name" content="{{ config('site.company') }}">
 @endsection
@@ -30,10 +30,12 @@
 
     <div class="hero__copy">
       <p class="eyebrow"><span class="dot"></span> Rigid &amp; setup boxes only &mdash; this page, this specialty</p>
-      <h1>Custom Rigid Boxes That Feel Like the Brand You&rsquo;re Building</h1>
+      <h1>Custom Printed Rigid Boxes That Feel Like the Brand You&rsquo;re Building</h1>
       <p class="lede">
-        Magnetic closure, drawer, shoulder-neck and book-style rigid boxes on 2mm&ndash;3mm greyboard,
-        wrapped in the stock you choose, finished with foil, emboss or soft-touch.
+        A rigid box manufacturer, not a middleman. Magnetic closure, drawer, shoulder-neck and
+        book-style rigid boxes on 2mm&ndash;3mm greyboard, wrapped in the stock you choose, finished
+        with foil, emboss or soft-touch &mdash; from 50-unit launch runs to
+        <a href="#wholesale">rigid boxes wholesale</a> at 2,500 and up.
         Send your specs and get a <strong>free 3D mockup and an exact quote within one hour</strong>.
       </p>
     </div>
@@ -43,11 +45,11 @@
         <li>Free 3D mockup &amp; dieline &mdash; before you spend a dollar</li>
         <li>No die, plate or design charges &mdash; ever</li>
         <li>You approve a physical sample before the run starts</li>
-        <li>Free shipping across the USA &amp; Canada</li>
+        <li>Free shipping across the USA</li>
       </ul>
 
       <div class="hero__proof">
-        <div class="proof"><strong>100</strong><span>unit minimum<br>per size &amp; style</span></div>
+        <div class="proof"><strong>50</strong><span>unit minimum<br>per size &amp; style</span></div>
         <div class="proof"><strong>12&ndash;15</strong><span>business days<br>standard turnaround</span></div>
         <div class="proof"><strong>1 hr</strong><span>quote response<br>in business hours</span></div>
       </div>
@@ -124,7 +126,7 @@
 <section class="sec" id="work">
   <div class="wrap">
     <header class="sechead">
-      <h2>Rigid boxes we&rsquo;ve built</h2>
+      <h2>Custom printed rigid boxes we&rsquo;ve built</h2>
       <p>Magnetic closure, drawer and printed lid-and-base builds from recent production runs. Tap any box to see it larger &mdash; the caption gives the exact build, so you can point at one and say &ldquo;like that.&rdquo;</p>
     </header>
 
@@ -159,27 +161,9 @@
       <span class="gallery__hint">Point us at any box above and we&rsquo;ll price that exact build for your product.</span>
     </p>
 
-    {{-- Corrugated work, kept clearly separate from the rigid line-up so the
-         page stays on-message for rigid box searches. --}}
-    <aside class="also">
-      <div class="also__thumbs">
-        @foreach ([
-          ['carton-flower', 'A floral printed folding carton opened to lift out a candle'],
-          ['carton-soap', 'A pink folding carton being folded up around a bar of soap'],
-          ['carton-tart', 'White printed folding cartons being assembled by hand'],
-          ['carton-otriea', 'A printed skincare folding carton turned to show each panel'],
-        ] as [$file, $alt])
-        <video class="film__vid" data-src="{{ asset('assets/video/'.$file.'.mp4') }}"
-               poster="{{ asset('assets/video/'.$file.'.jpg') }}" width="360" height="640"
-               muted loop playsinline preload="none"
-               aria-label="{{ $alt }}"></video>
-        @endforeach
-      </div>
-      <p><strong>We also print corrugated mailers and folding cartons.</strong>
-      Same press, same finishing team &mdash; useful if your rigid box needs an outer shipper, or if
-      you want a lighter option for e-commerce. Mention it when you request your quote and we&rsquo;ll
-      price both.</p>
-    </aside>
+    {{-- The corrugated mailer / folding carton aside was removed: it pulled the
+         page off-message for rigid box searches, and its four carton clips were
+         the largest media payload on the page for content nobody came here for. --}}
   </div>
 </section>
 
@@ -261,7 +245,7 @@
 <section class="sec" id="specs">
   <div class="wrap">
     <header class="sechead">
-      <h2>The spec sheet, in plain English</h2>
+      <h2>Rigid Box Packaging Specifications, in Plain English</h2>
       <p>Everything here mixes and matches. Have a reference box you like? Send a photo &mdash; we&rsquo;ll match it.</p>
     </header>
 
@@ -341,9 +325,9 @@
 
     <div class="grid grid--3 tiers">
       <article class="tier">
-        <p class="tier__q">100 &ndash; 500 units</p>
+        <p class="tier__q">50 &ndash; 500 units</p>
         <p class="tier__p">$3.20<span class="dash">&ndash;</span>$6.00 <span class="per">/ unit</span></p>
-        <p class="tier__d">Launch runs, PR kits and market tests. Full customization, no volume commitment.</p>
+        <p class="tier__d">Launch runs, PR kits and market tests. Full customization, no volume commitment. Runs under 100 units are quoted individually and sit at the top of this range &mdash; the setup work is the same whether we make 50 boxes or 500.</p>
       </article>
       <article class="tier tier--hi">
         <p class="tier__badge">Most quoted</p>
@@ -363,31 +347,56 @@
   </div>
 </section>
 
-{{-- ── Testimonials ──────────────────────────────────────────
-     REPLACE with real, attributable customer quotes before running ads.
-     Google Ads policy prohibits fabricated testimonials. Each card that
-     still holds placeholder copy hides itself, and the section goes with
-     them if none are real yet.
-     ────────────────────────────────────────────────────────── --}}
-<section class="sec sec--cream" id="reviews">
+{{-- ── Wholesale / volume ────────────────────────────────────────
+     Written for the buyer who searched "rigid boxes wholesale" rather than
+     "custom rigid boxes": they already know what they want made and are
+     shopping the price of the run, so this leads with the brackets and what
+     actually moves them, not with the product education above. --}}
+<section class="sec sec--cream" id="wholesale">
   <div class="wrap">
-    <header class="sechead"><h2>What buyers say after the first run</h2></header>
+    <header class="sechead">
+      <h2>Rigid Boxes Wholesale &mdash; Volume Pricing Direct From the Manufacturer</h2>
+      <p>If you are pricing a program rather than a first run, you are buying from the floor that
+      makes the box. No broker margin sits between your PO and the press.</p>
+    </header>
 
-    <div class="grid grid--3 quotes">
-      @foreach ([
-        'REPLACE — real customer quote about mockup speed or structural help.',
-        'REPLACE — real customer quote about foil/print quality or the sample process.',
-        'REPLACE — real customer quote about hitting a deadline or a reorder.',
-      ] as $testimonial)
-      <figure class="quote">
-        <div class="stars" aria-label="5 out of 5">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-        <blockquote>{{ $testimonial }}</blockquote>
-        <figcaption><strong>Name</strong><span>Title, Brand</span></figcaption>
-      </figure>
-      @endforeach
+    <div class="grid grid--3 cards">
+      <article class="card">
+        <h3>Where the price actually breaks</h3>
+        <p>Wholesale rigid box pricing steps down at <strong>500</strong> and again at
+        <strong>2,500 units</strong>. Most of a rigid box&rsquo;s cost is setup and hand-assembly, so
+        the jump from 250 to 500 saves more per unit than the jump from 2,500 to 5,000. We quote
+        two brackets side by side so you can see whether the next tier up pays for itself.</p>
+      </article>
+      <article class="card">
+        <h3>Scheduled releases, one locked price</h3>
+        <p>Commit to an annual volume and draw it down across the year. We hold your board, wrap
+        stock and Pantones against the approved sample, warehouse the balance, and release on your
+        call-off &mdash; so your fourth shipment matches your first and your cash is not tied up in
+        a year of inventory.</p>
+      </article>
+      <article class="card">
+        <h3>What a rigid box supplier owes you at volume</h3>
+        <p>A named project manager on US hours, written lead times before you raise the PO, QC
+        against your retained sample on every run, and freight built into the quoted number. If a
+        reorder of custom printed rigid boxes does not match the sample in your hand, that is ours
+        to fix, not yours to argue about.</p>
+      </article>
     </div>
+
+    <p class="center cta-stack">
+      <a class="btn btn--primary" href="#quote" data-track="cta-wholesale">Get Wholesale Pricing</a>
+      <span class="gallery__hint">Send the annual volume you are planning and we will quote the
+      brackets around it, including the one you have not asked for yet.</span>
+    </p>
   </div>
 </section>
+
+{{-- Testimonials removed rather than left as placeholders. Google Ads
+     prohibits fabricated testimonials, and star ratings with no real
+     reviews behind them are a misrepresentation risk on a page taking
+     paid traffic. When real, attributable quotes exist, rebuild the
+     section — do not reinstate the stars without reviews to back them. --}}
 
 {{-- ── FAQ ───────────────────────────────────────────────────── --}}
 <section class="sec" id="faq">

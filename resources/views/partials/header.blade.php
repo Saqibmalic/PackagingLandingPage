@@ -23,6 +23,7 @@
           <a href="#specs">Materials &amp; Finishes</a>
           <a href="#process">How It Works</a>
           <a href="#pricing">Pricing</a>
+          <a href="#wholesale">Wholesale</a>
           <a href="#faq">FAQ</a>
         </nav>
         <div class="head__contact">

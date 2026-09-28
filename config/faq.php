@@ -18,7 +18,15 @@
 return [
     [
         'q' => 'What is the minimum order for custom rigid boxes?',
-        'a' => 'Our standard minimum is 100 units per size and style. Rigid boxes are hand-assembled, so smaller runs are possible on request — they simply carry a higher unit cost. Tell us your quantity and we’ll tell you honestly whether it makes sense.',
+        'a' => 'Our minimum is 50 units per size and style. Rigid boxes are hand-assembled, so a 50-unit run carries a higher cost per box than a 500-unit run of the same spec — the setup work is identical either way. Tell us your quantity and we’ll quote it honestly.',
+    ],
+    [
+        'q' => 'Do you offer rigid boxes wholesale, and what are your volume prices?',
+        'a' => 'Yes. Wholesale rigid box pricing starts at 500 units and drops again at 2,500. As a rigid box manufacturer we run your job on our own floor rather than brokering it out, so volume savings come off the real cost of the run and not off a reseller’s margin. Send the quantity you are planning and we will quote two tiers side by side so you can see exactly what the next bracket up would save you.',
+    ],
+    [
+        'q' => 'What makes a rigid box supplier different from a box reseller?',
+        'a' => 'A reseller forwards your specs to whichever factory quotes cheapest that week, so your board, wrap and color can move between runs. We are the manufacturer: structure, printing, foiling, wrapping and hand-assembly all happen in one place, against the physical sample you approved. That is why reorders of custom printed rigid boxes match the first run.',
     ],
     [
         'q' => 'How long does production take?',
@@ -42,7 +50,7 @@ return [
     ],
     [
         'q' => 'Do you ship free within the USA?',
-        'a' => 'Yes. Ground shipping to a single address in the contiguous United States and Canada is included in every quote. Expedited freight, split shipments and 3PL delivery can be quoted on request.',
+        'a' => 'Yes. Ground shipping to a single address in the contiguous United States is included in every quote. Expedited freight, split shipments and 3PL delivery can be quoted on request.',
     ],
     [
         'q' => 'Can you match a Pantone color or replicate a box I already have?',

@@ -127,6 +127,95 @@ class FullFlowTest extends TestCase
     }
 
     #[Test]
+    public function the_stated_minimum_is_the_same_number_everywhere(): void
+    {
+        // A buyer who reads "50" in the hero and then meets "100" in the
+        // quantity dropdown stops trusting the rest of the page. These four
+        // places are the ones that state the number, so they are held
+        // together here rather than by whoever edits one of them next.
+        $minimum = '50';
+
+        $html = $this->get('/')->assertOk()->getContent();
+
+        // Hero stat block.
+        $this->assertStringContainsString("<strong>{$minimum}</strong><span>unit minimum", $html);
+
+        // Meta description.
+        $this->assertStringContainsString("{$minimum} unit minimum", $html);
+
+        // FAQ answer, which is also emitted as FAQPage structured data.
+        $this->assertStringContainsString("minimum is {$minimum} units", config('faq')[0]['a']);
+
+        // The first option of the quantity dropdown opens at the minimum.
+        $this->assertStringStartsWith($minimum.' ', (new QuoteForm)->quantities()[0]);
+    }
+
+    #[Test]
+    public function the_canonical_points_at_this_page_and_not_the_main_site(): void
+    {
+        // Pointing the canonical at the main site told Google this page was a
+        // duplicate of a different URL, which suppresses it in search and
+        // gives every shared link the wrong title card.
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('<link rel="canonical" href="https://offers.customboxesexperts.com/">', false)
+            ->assertSee('<meta property="og:url" content="https://offers.customboxesexperts.com/">', false)
+            ->assertDontSee('customboxesexperts.com/custom-rigid-boxes', false);
+    }
+
+    #[Test]
+    public function no_placeholder_testimonial_or_unearned_star_rating_survives(): void
+    {
+        // Google Ads prohibits fabricated testimonials, and a five-star row
+        // with no reviews behind it is a misrepresentation on a page taking
+        // paid traffic. This fails the build rather than the ad account.
+        $html = $this->get('/')->assertOk()->getContent();
+
+        $this->assertStringNotContainsString('REPLACE', $html);
+        $this->assertStringNotContainsString('★★★★★', $html);
+        $this->assertStringNotContainsString('&#9733;', $html);
+        $this->assertStringNotContainsString('aggregateRating', $html);
+    }
+
+    #[Test]
+    public function the_wholesale_section_carries_the_core_rigid_vocabulary(): void
+    {
+        // These are the terms the campaign bids on. They have to appear in
+        // copy a visitor can actually read — hidden or stuffed text is a
+        // policy problem, not an optimisation.
+        $html = $this->get('/')->assertOk()->getContent();
+
+        foreach ([
+            'rigid boxes wholesale',
+            'rigid box manufacturer',
+            'rigid box supplier',
+            'custom printed rigid boxes',
+            'rigid box packaging',
+        ] as $phrase) {
+            $this->assertMatchesRegularExpression(
+                '/'.preg_quote($phrase, '/').'/i',
+                $html,
+                "The page no longer says \"{$phrase}\" anywhere a buyer can read it."
+            );
+        }
+
+        $this->assertStringContainsString('id="wholesale"', $html);
+    }
+
+    #[Test]
+    public function the_page_no_longer_promises_shipping_or_service_into_canada(): void
+    {
+        // Free shipping and the service area are commitments, so they are
+        // checked on the legal pages too, not just the sales copy.
+        foreach (['/', '/privacy-policy', '/terms'] as $path) {
+            $this->get($path)
+                ->assertOk()
+                ->assertDontSee('Canada')
+                ->assertDontSee('Canadian');
+        }
+    }
+
+    #[Test]
     public function the_dashboard_is_left_out_of_the_ads_tag(): void
     {
         // Sales staff opening leads all day would otherwise register as

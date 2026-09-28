@@ -24,7 +24,7 @@
                     '@type' => 'ContactPoint',
                     'telephone' => config('site.phone_e164'),
                     'contactType' => 'sales',
-                    'areaServed' => ['US', 'CA'],
+                    'areaServed' => ['US'],
                     'availableLanguage' => 'English',
                 ],
             ],

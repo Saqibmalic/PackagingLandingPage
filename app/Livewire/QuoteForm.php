@@ -74,7 +74,10 @@ class QuoteForm extends Component
      */
     public function quantities(): array
     {
-        return ['100 – 250', '250 – 500', '500 – 1,000', '1,000 – 5,000', '5,000 – 10,000', '10,000+', 'Not sure yet'];
+        // The first bracket opens at the stated 50-unit minimum. If that
+        // minimum ever moves, it moves in config/faq.php, the hero stat, the
+        // meta description and here — FullFlowTest holds the four together.
+        return ['50 – 250', '250 – 500', '500 – 1,000', '1,000 – 5,000', '5,000 – 10,000', '10,000+', 'Not sure yet'];
     }
 
     public function submit()

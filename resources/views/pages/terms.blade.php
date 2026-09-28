@@ -41,7 +41,7 @@
 
         <h2>5. Shipping and delivery</h2>
         <ul>
-          <li>Ground shipping to a single address in the contiguous United States or Canada is included in quoted prices unless stated otherwise. Expedited freight, split shipments, residential or liftgate delivery may be quoted separately.</li>
+          <li>Ground shipping to a single address in the contiguous United States is included in quoted prices unless stated otherwise. Expedited freight, split shipments, residential or liftgate delivery may be quoted separately.</li>
           <li>Delivery dates are estimates. We are not liable for carrier delays outside our control.</li>
           <li>Inspect shipments on arrival and note any visible damage on the carrier&rsquo;s paperwork.</li>
         </ul>
