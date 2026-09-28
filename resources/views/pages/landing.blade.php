@@ -33,9 +33,7 @@
       <h1>Custom Printed Rigid Boxes That Feel Like the Brand You&rsquo;re Building</h1>
       <p class="lede">
         A rigid box manufacturer, not a middleman. Magnetic closure, drawer, shoulder-neck and
-        book-style rigid boxes on 2mm&ndash;3mm greyboard, wrapped in the stock you choose, finished
-        with foil, emboss or soft-touch &mdash; from 50-unit launch runs to
-        <a href="#wholesale">rigid boxes wholesale</a> at 2,500 and up.
+        book-style boxes on 2mm&ndash;3mm greyboard, finished with foil, emboss or soft-touch.
         Send your specs and get a <strong>free 3D mockup and an exact quote within one hour</strong>.
       </p>
     </div>
@@ -348,46 +346,27 @@
 </section>
 
 {{-- ── Wholesale / volume ────────────────────────────────────────
-     Written for the buyer who searched "rigid boxes wholesale" rather than
-     "custom rigid boxes": they already know what they want made and are
-     shopping the price of the run, so this leads with the brackets and what
-     actually moves them, not with the product education above. --}}
+     Exists so an ad bidding on "rigid boxes wholesale" lands on a page that
+     says it. Deliberately short: this buyer already knows what they want
+     made and is shopping the price of the run, so it states the brackets
+     and gets out of the way rather than repeating the education above. --}}
 <section class="sec sec--cream" id="wholesale">
-  <div class="wrap">
+  <div class="wrap wrap--narrow">
     <header class="sechead">
-      <h2>Rigid Boxes Wholesale &mdash; Volume Pricing Direct From the Manufacturer</h2>
-      <p>If you are pricing a program rather than a first run, you are buying from the floor that
-      makes the box. No broker margin sits between your PO and the press.</p>
+      <h2>Rigid Boxes Wholesale</h2>
+      <p>Volume pricing direct from the rigid box manufacturer &mdash; no broker margin between
+      your PO and the press.</p>
     </header>
 
-    <div class="grid grid--3 cards">
-      <article class="card">
-        <h3>Where the price actually breaks</h3>
-        <p>Wholesale rigid box pricing steps down at <strong>500</strong> and again at
-        <strong>2,500 units</strong>. Most of a rigid box&rsquo;s cost is setup and hand-assembly, so
-        the jump from 250 to 500 saves more per unit than the jump from 2,500 to 5,000. We quote
-        two brackets side by side so you can see whether the next tier up pays for itself.</p>
-      </article>
-      <article class="card">
-        <h3>Scheduled releases, one locked price</h3>
-        <p>Commit to an annual volume and draw it down across the year. We hold your board, wrap
-        stock and Pantones against the approved sample, warehouse the balance, and release on your
-        call-off &mdash; so your fourth shipment matches your first and your cash is not tied up in
-        a year of inventory.</p>
-      </article>
-      <article class="card">
-        <h3>What a rigid box supplier owes you at volume</h3>
-        <p>A named project manager on US hours, written lead times before you raise the PO, QC
-        against your retained sample on every run, and freight built into the quoted number. If a
-        reorder of custom printed rigid boxes does not match the sample in your hand, that is ours
-        to fix, not yours to argue about.</p>
-      </article>
-    </div>
+    <ul class="ticks">
+      <li>Price breaks at <strong>500</strong> and again at <strong>2,500 units</strong> &mdash; we
+      quote both brackets so you can see if the next tier pays for itself.</li>
+      <li>Annual volume, scheduled call-offs, one locked price. We warehouse the balance.</li>
+      <li>Every reorder is run against the sample you approved, not a fresh guess.</li>
+    </ul>
 
     <p class="center cta-stack">
       <a class="btn btn--primary" href="#quote" data-track="cta-wholesale">Get Wholesale Pricing</a>
-      <span class="gallery__hint">Send the annual volume you are planning and we will quote the
-      brackets around it, including the one you have not asked for yet.</span>
     </p>
   </div>
 </section>
